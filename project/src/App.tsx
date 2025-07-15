@@ -1,4 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import AOS from 'aos';
+import 'aos/dist/aos.css';
+import { BrowserRouter, Routes, Route, useNavigate } from 'react-router-dom';
 import { 
   Star, 
   Moon, 
@@ -25,13 +28,15 @@ import { BookingModal } from './components/BookingModal';
 import { crystals } from './data/crystals';
 import { CartItem } from './types';
 import { Crystal, CrystalForm } from './types';
+import PaymentPage from './components/PaymentPage';
 
-function App() {
+function MainApp() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [scrollY, setScrollY] = useState(0);
   const [cart, setCart] = useState<CartItem[]>([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
+  const navigate = useNavigate();
   const [bookingModal, setBookingModal] = useState<{
     isOpen: boolean;
     serviceType: 'tarot' | 'coaching' | 'palm' | 'karma' | 'crystal';
@@ -51,6 +56,10 @@ function App() {
     const handleScroll = () => setScrollY(window.scrollY);
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  useEffect(() => {
+    AOS.init({ once: true, duration: 900, offset: 60 });
   }, []);
 
   const services = [
@@ -136,25 +145,27 @@ This gentle yet transformative modality helps you:
         return [...prevCart, { crystal, form, quantity }];
       }
     });
-    setIsCartOpen(true);
+    // Do NOT open the cart automatically
   };
 
-  const updateCartQuantity = (crystalId: string, quantity: number) => {
+  const updateCartQuantity = (compositeId: string, quantity: number) => {
+    const [crystalId, formName] = compositeId.split('-');
     if (quantity === 0) {
-      removeFromCart(crystalId);
+      removeFromCart(compositeId);
       return;
     }
     setCart(prevCart =>
       prevCart.map(item =>
-        item.crystal.id === crystalId
+        item.crystal.id === crystalId && item.form.name === formName
           ? { ...item, quantity }
           : item
       )
     );
   };
 
-  const removeFromCart = (crystalId: string) => {
-    setCart(prevCart => prevCart.filter(item => item.crystal.id !== crystalId));
+  const removeFromCart = (compositeId: string) => {
+    const [crystalId, formName] = compositeId.split('-');
+    setCart(prevCart => prevCart.filter(item => !(item.crystal.id === crystalId && item.form.name === formName)));
   };
 
   const getTotalPrice = () => {
@@ -189,6 +200,9 @@ This gentle yet transformative modality helps you:
   const handleBookYourSession = () => {
     document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' });
   };
+
+  // Helper to close the form modal
+  const handleCloseFormModal = () => setIsFormModalOpen(false);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-900 via-indigo-900 to-black text-white overflow-x-hidden">
@@ -270,12 +284,12 @@ This gentle yet transformative modality helps you:
       </nav>
 
       {/* Hero Section */}
-      <section id="home" className="min-h-screen flex items-center justify-center relative">
+      <section id="home" className="min-h-screen flex items-center justify-center relative" data-aos="fade-up">
         <div className="text-center max-w-4xl mx-auto px-4">
           <div className="mb-8">
             <img src="/image.png" alt="Elemental Visions Logo" className="w-32 h-32 mx-auto mb-6 rounded-full shadow-2xl" />
           </div>
-          <h1 className="text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-yellow-400 via-orange-400 to-red-400 bg-clip-text text-transparent">
+          <h1 className="text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-yellow-400 via-orange-400 to-red-400 bg-clip-text text-transparent font-unbounded drop-shadow-lg">
             Elemental Visions
           </h1>
           <p className="text-xl md:text-2xl mb-4 text-purple-200">
@@ -303,10 +317,10 @@ This gentle yet transformative modality helps you:
       </section>
 
       {/* Services Section */}
-      <section id="services" className="py-20 px-4">
+      <section id="services" className="py-20 px-4" data-aos="fade-up">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-teal-400 to-purple-400 bg-clip-text text-transparent">
+            <h2 className="text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-teal-400 to-purple-400 bg-clip-text text-transparent font-unbounded drop-shadow-lg">
               Sacred Services
             </h2>
             <p className="text-xl text-gray-300 max-w-3xl mx-auto">
@@ -318,24 +332,27 @@ This gentle yet transformative modality helps you:
             {services.map((service, index) => (
               <div 
                 key={index}
-                className="bg-gradient-to-br from-purple-800/50 to-indigo-800/50 backdrop-blur-sm rounded-2xl p-8 border border-purple-500/30 hover:border-yellow-400/50 transition-all duration-300 transform hover:scale-105 hover:shadow-2xl group"
+                className="bg-gradient-to-br from-purple-800/50 to-indigo-800/50 glass card-shadow p-8 border border-purple-500/30 hover:border-yellow-400/50 transition-all duration-300 transform hover:scale-105 hover:shadow-2xl group flex flex-col justify-between"
+                data-aos="zoom-in"
               >
                 <div className="text-yellow-400 mb-4 group-hover:scale-110 transition-transform duration-300">
                   {service.icon}
                 </div>
                 <h3 className="text-2xl font-bold mb-4 text-white">{service.title}</h3>
                 <p className="text-gray-300 mb-6 leading-relaxed">{service.description}</p>
-                <div className="flex justify-between items-center mb-4">
-                  <span className="text-yellow-400 font-semibold text-lg">{service.basePrice}</span>
-                  <span className="text-purple-300 text-sm">{service.duration}</span>
+                <div className="mt-auto">
+                  <div className="flex justify-between items-center mb-3">
+                    <span className="text-yellow-400 font-semibold text-lg">{service.basePrice}</span>
+                    <span className="text-purple-300 text-sm">{service.duration}</span>
+                  </div>
+                  <button 
+                    onClick={() => handleBookService(service.type, service.title)}
+                    className="w-full bg-gradient-to-r from-teal-600 to-purple-600 hover:from-teal-700 hover:to-purple-700 py-3 rounded-lg font-semibold transition-all duration-300 flex items-center justify-center"
+                  >
+                    Book Now
+                    <ChevronRight className="w-4 h-4 ml-2" />
+                  </button>
                 </div>
-                <button 
-                  onClick={() => handleBookService(service.type, service.title)}
-                  className="w-full bg-gradient-to-r from-teal-600 to-purple-600 hover:from-teal-700 hover:to-purple-700 py-3 rounded-lg font-semibold transition-all duration-300 flex items-center justify-center"
-                >
-                  Book Now
-                  <ChevronRight className="w-4 h-4 ml-2" />
-                </button>
               </div>
             ))}
           </div>
@@ -343,11 +360,11 @@ This gentle yet transformative modality helps you:
       </section>
 
       {/* About Section */}
-      <section id="about" className="py-20 px-4 bg-gradient-to-r from-purple-900/50 to-indigo-900/50">
+      <section id="about" className="py-20 px-4 bg-gradient-to-r from-purple-900/50 to-indigo-900/50" data-aos="fade-up">
         <div className="max-w-6xl mx-auto">
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div>
-              <h2 className="text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-yellow-400 to-orange-400 bg-clip-text text-transparent">
+              <h2 className="text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-yellow-400 to-orange-400 bg-clip-text text-transparent font-unbounded drop-shadow-lg">
                 Meet Sakshi
               </h2>
               <p className="text-lg text-gray-300 mb-6 leading-relaxed">
@@ -377,10 +394,10 @@ This gentle yet transformative modality helps you:
       </section>
 
       {/* Crystals Section */}
-      <section id="crystals" className="py-20 px-4">
+      <section id="crystals" className="py-20 px-4" data-aos="fade-up">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-teal-400 to-purple-400 bg-clip-text text-transparent">
+            <h2 className="text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-teal-400 to-purple-400 bg-clip-text text-transparent font-unbounded drop-shadow-lg">
               Healing Crystals
             </h2>
             <p className="text-xl text-gray-300 max-w-3xl mx-auto">
@@ -391,33 +408,47 @@ This gentle yet transformative modality helps you:
           <div className="relative">
             <button
               onClick={() => scrollCrystals('left')}
-              className="absolute left-0 top-1/2 transform -translate-y-1/2 z-10 bg-purple-600/80 hover:bg-purple-700 p-3 rounded-full transition-all duration-300"
+              className="absolute left-2 top-1/2 transform -translate-y-1/2 z-20 bg-purple-600/80 hover:bg-purple-700 p-3 rounded-full transition-all duration-300 shadow-xl border-4 border-transparent"
             >
               <ChevronLeft className="w-6 h-6" />
             </button>
             
             <button
               onClick={() => scrollCrystals('right')}
-              className="absolute right-0 top-1/2 transform -translate-y-1/2 z-10 bg-purple-600/80 hover:bg-purple-700 p-3 rounded-full transition-all duration-300"
+              className="absolute right-2 top-1/2 transform -translate-y-1/2 z-20 bg-purple-600/80 hover:bg-purple-700 p-3 rounded-full transition-all duration-300 shadow-xl border-4 border-transparent"
             >
               <ChevronRight className="w-6 h-6" />
             </button>
 
             <div 
               id="crystals-container"
-              className="flex space-x-6 overflow-x-auto scrollbar-hide pb-4"
+              className="flex space-x-6 overflow-x-auto scrollbar-hide pb-4 px-12 relative"
               style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
             >
-              {crystals.map((crystal) => (
-                <div 
+              {crystals.map((crystal, idx) => (
+                <div
                   key={crystal.id}
-                  className="flex-shrink-0 w-80 bg-gradient-to-br from-purple-800/50 to-indigo-800/50 backdrop-blur-sm rounded-2xl overflow-hidden border border-purple-500/30 hover:border-yellow-400/50 transition-all duration-300 transform hover:scale-105 hover:shadow-2xl group"
+                  className={`flex-shrink-0 w-80 h-[500px] glass card-shadow overflow-hidden border border-purple-500/30 hover:border-yellow-400/50 transition-all duration-300 group relative flex flex-col justify-between ${idx === 0 ? 'ml-6' : ''} ${idx === crystals.length - 1 ? 'mr-6' : ''} hover:scale-105 hover:shadow-2xl hover:z-30`}
+                  style={{ zIndex: 1 }}
+                  data-aos="zoom-in-up"
                 >
-                  <div className="p-6">
-                    <h3 className="text-xl font-bold mb-2 text-white">{crystal.name}</h3>
-                    <p className="text-purple-300 mb-2">{crystal.purpose}</p>
-                    <p className="text-gray-400 text-sm mb-4">{crystal.description}</p>
-                    <div className="flex flex-wrap gap-1 mb-4">
+                  {/* Crystal Image as main focus */}
+                  <div className="h-60 w-full relative overflow-hidden rounded-t-2xl flex-shrink-0">
+                    <img 
+                      src={crystal.image} 
+                      alt={crystal.name}
+                      className="w-full h-full object-cover object-center rounded-t-2xl transition-all duration-300"
+                    />
+                    {/* Glassy overlay for name and purpose */}
+                    <div className="absolute bottom-0 left-0 w-full bg-black/40 backdrop-blur-md p-4 rounded-b-2xl flex flex-col items-start">
+                      <h3 className="text-2xl font-bold text-white drop-shadow mb-1">{crystal.name}</h3>
+                      <p className="text-yellow-300 font-semibold text-base mb-1 drop-shadow">{crystal.purpose}</p>
+                    </div>
+                  </div>
+                  {/* Card content below image */}
+                  <div className="p-4 flex flex-col gap-2 flex-1 min-h-0 justify-between overflow-hidden">
+                    <p className="text-gray-300 text-sm line-clamp-3 mb-1">{crystal.description}</p>
+                    <div className="flex flex-wrap gap-1 mb-1">
                       {crystal.properties.map((property, index) => (
                         <span 
                           key={index}
@@ -427,21 +458,19 @@ This gentle yet transformative modality helps you:
                         </span>
                       ))}
                     </div>
-                    <div className="mb-2 text-xs text-purple-200">
-                      Available as: Bracelets | Tumbles | Trees | Pendants | Raw Crystals
+                    <div className="text-xs text-purple-200">
+                      Available as: {crystal.forms.map(f => f.name).join(' | ')}
                     </div>
-                    <div className="flex justify-between items-center">
-                      <button
-                        onClick={() => {
-                          setSelectedCrystal(crystal);
-                          setIsFormModalOpen(true);
-                          setSelectedForms({});
-                        }}
-                        className="bg-gradient-to-r from-teal-600 to-purple-600 hover:from-teal-700 hover:to-purple-700 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-300"
-                      >
-                        Select Form
-                      </button>
-                    </div>
+                    <button
+                      onClick={() => {
+                        setSelectedCrystal(crystal);
+                        setIsFormModalOpen(true);
+                        setSelectedForms({});
+                      }}
+                      className="mt-4 bg-gradient-to-r from-teal-500 to-purple-500 hover:from-teal-600 hover:to-purple-600 px-4 py-2 rounded-lg text-sm font-bold text-white shadow-lg transition-all duration-300 w-full"
+                    >
+                      Select Form
+                    </button>
                   </div>
                 </div>
               ))}
@@ -451,10 +480,10 @@ This gentle yet transformative modality helps you:
       </section>
 
       {/* Testimonials Section */}
-      <section className="py-20 px-4 bg-gradient-to-r from-purple-900/50 to-indigo-900/50">
+      <section className="py-20 px-4 bg-gradient-to-r from-purple-900/50 to-indigo-900/50" data-aos="fade-up">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-yellow-400 to-orange-400 bg-clip-text text-transparent">
+            <h2 className="text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-yellow-400 to-orange-400 bg-clip-text text-transparent font-unbounded drop-shadow-lg">
               Client Transformations
             </h2>
             <p className="text-xl text-gray-300">
@@ -466,7 +495,7 @@ This gentle yet transformative modality helps you:
             {testimonials.map((testimonial, index) => (
               <div 
                 key={index}
-                className="bg-gradient-to-br from-purple-800/50 to-indigo-800/50 backdrop-blur-sm rounded-2xl p-8 border border-purple-500/30 hover:border-yellow-400/50 transition-all duration-300"
+                className="bg-gradient-to-br from-purple-800/50 to-indigo-800/50 glass card-shadow p-8 border border-purple-500/30 hover:border-yellow-400/50 transition-all duration-300"
               >
                 <div className="flex mb-4">
                   {[...Array(testimonial.rating)].map((_, i) => (
@@ -488,7 +517,7 @@ This gentle yet transformative modality helps you:
       <section id="contact" className="py-20 px-4">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-teal-400 to-purple-400 bg-clip-text text-transparent">
+            <h2 className="text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-teal-400 to-purple-400 bg-clip-text text-transparent font-unbounded drop-shadow-lg">
               Begin Your Journey
             </h2>
             <p className="text-xl text-gray-300">
@@ -526,7 +555,7 @@ This gentle yet transformative modality helps you:
               </div>
             </div>
 
-            <div className="bg-gradient-to-br from-purple-800/50 to-indigo-800/50 backdrop-blur-sm rounded-2xl p-8 border border-purple-500/30">
+            <div className="bg-gradient-to-br from-purple-800/50 to-indigo-800/50 glass card-shadow rounded-2xl p-8 border border-purple-500/30">
               <h3 className="text-2xl font-bold mb-6 text-white">Book a Session</h3>
               <form className="space-y-6">
                 <div>
@@ -616,8 +645,8 @@ This gentle yet transformative modality helps you:
         items={cart}
         total={getTotalPrice()}
         onOrderComplete={() => {
-          setCart([]);
-          alert('Order placed successfully! You will receive payment instructions shortly.');
+          setIsCheckoutOpen(false);
+          navigate('/payment', { state: { items: cart, total: getTotalPrice() } });
         }}
       />
 
@@ -630,75 +659,105 @@ This gentle yet transformative modality helps you:
 
       {/* Modal for selecting forms */}
       {isFormModalOpen && selectedCrystal && (
-        <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center">
-          <div className="bg-gradient-to-br from-purple-900 to-indigo-900 rounded-2xl p-6 max-w-lg w-full relative shadow-2xl border border-purple-500/30">
-            <button className="absolute top-3 right-3 text-yellow-400 hover:text-white text-xl font-bold transition-colors" onClick={() => setIsFormModalOpen(false)}>&times;</button>
-            <h3 className="text-xl font-extrabold mb-6 text-yellow-400 text-center tracking-tight drop-shadow">Select Form(s) for <span className="text-white">{selectedCrystal.name}</span></h3>
-            <div className="flex flex-col gap-3 mb-6">
-              {selectedCrystal.forms.map((form: CrystalForm) => {
-                const selected = (selectedForms[form.name] || 0) > 0;
-                return (
-                  <div
-                    key={form.name}
-                    className={`flex items-center bg-gradient-to-r from-purple-800/60 to-indigo-800/60 border ${selected ? 'border-yellow-400 shadow-lg' : 'border-purple-500/20'} rounded-xl px-3 py-2 shadow-sm hover:shadow-md transition-all duration-200 focus-within:ring-2 focus-within:ring-yellow-400 relative group`}
-                  >
-                    <img src={form.image} alt={form.name} className="w-14 h-14 object-cover rounded-full border-2 border-yellow-400 shadow bg-black/20 mr-3" />
-                    <div className="flex-1 min-w-0">
-                      <div className="font-semibold text-base text-yellow-200 mb-0.5 truncate">{form.name}</div>
-                      <div className="text-yellow-400 font-bold text-base mb-0.5">₹{form.price}</div>
-                      {form.description && <div className="text-xs text-purple-200 mb-0.5 text-left truncate">{form.description}</div>}
-                    </div>
-                    <div className="flex items-center gap-1 ml-2">
-                      <button
-                        type="button"
-                        aria-label={`Decrease quantity of ${form.name}`}
-                        className="w-7 h-7 flex items-center justify-center rounded-full bg-yellow-400 text-purple-900 font-bold hover:bg-yellow-300 transition text-base"
-                        onClick={() => {
-                          setSelectedForms(prev => {
-                            const qty = (prev[form.name] || 0) - 1;
-                            if (qty <= 0) {
-                              const { [form.name]: _, ...rest } = prev;
-                              return rest;
-                            }
-                            return { ...prev, [form.name]: qty };
-                          });
-                        }}
-                      >-</button>
-                      <span className="font-bold text-base text-white w-6 text-center select-none">{selectedForms[form.name] || 0}</span>
-                      <button
-                        type="button"
-                        aria-label={`Increase quantity of ${form.name}`}
-                        className="w-7 h-7 flex items-center justify-center rounded-full bg-yellow-400 text-purple-900 font-bold hover:bg-yellow-300 transition text-base"
-                        onClick={() => setSelectedForms(prev => ({ ...prev, [form.name]: (prev[form.name] || 0) + 1 }))}
-                      >+</button>
-                    </div>
-                    {selected && (
-                      <span className="absolute top-2 left-2 bg-yellow-400 text-purple-900 rounded-full p-0.5 shadow z-10">
-                        <svg width="16" height="16" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7"/></svg>
-                      </span>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-            {Object.values(selectedForms).some(qty => qty > 0) && (
-              <div className="sticky bottom-0 left-0 right-0 bg-gradient-to-r from-purple-900/90 to-indigo-900/90 rounded-b-2xl p-3 mt-2 flex justify-center shadow-inner z-10">
-                <button
-                  className="w-full max-w-xs bg-gradient-to-r from-yellow-400 to-orange-400 hover:from-yellow-500 hover:to-orange-500 py-2 rounded-xl text-purple-900 font-extrabold text-base shadow-lg transition-all duration-300 drop-shadow"
-                  onClick={() => {
-                    Object.entries(selectedForms).forEach(([formName, qty]) => {
-                      if (qty > 0) {
-                        const form = selectedCrystal.forms.find(f => f.name === formName);
-                        if (form) addToCart(selectedCrystal, form, qty);
-                      }
-                    });
-                    setIsFormModalOpen(false);
-                  }}
-                >
-                  Add Selected to Cart
-                </button>
+        <div
+          className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center pt-10 pb-6"
+          onClick={handleCloseFormModal}
+        >
+          <div
+            className="glass card-shadow bg-gradient-to-br from-purple-900/90 to-indigo-900/90 rounded-3xl max-w-3xl w-full relative shadow-2xl border-2 border-yellow-400/40 animate-fadeIn max-h-[90vh] overflow-y-auto backdrop-blur-xl flex flex-col md:flex-row p-0"
+            onClick={e => e.stopPropagation()}
+          >
+            <button
+              className="absolute top-4 right-4 text-yellow-400 hover:text-white text-2xl font-bold transition-colors bg-black/40 rounded-full w-10 h-10 flex items-center justify-center shadow-xl z-20 border-2 border-yellow-400/40"
+              onClick={handleCloseFormModal}
+              aria-label="Close"
+            >
+              &times;
+            </button>
+            {/* Left: Crystal Info */}
+            <div className="flex-1 flex flex-col items-center justify-center p-8 border-b md:border-b-0 md:border-r border-purple-500/30 min-w-[260px] max-w-[340px]">
+              <img src={selectedCrystal.image} alt={selectedCrystal.name} className="w-32 h-32 object-cover rounded-2xl shadow-xl border-4 border-yellow-400/40 mb-6" />
+              <h3 className="text-2xl font-extrabold mb-2 text-yellow-400 text-center tracking-tight drop-shadow-lg uppercase font-unbounded">{selectedCrystal.name}</h3>
+              <div className="text-yellow-300 font-semibold text-base mb-2 drop-shadow text-center">{selectedCrystal.purpose}</div>
+              <div className="text-purple-200 text-sm mb-4 text-center">{selectedCrystal.description}</div>
+              <div className="flex flex-wrap gap-2 justify-center mb-2">
+                {selectedCrystal.properties.map((property, idx) => (
+                  <span key={idx} className="text-xs bg-purple-600/30 text-purple-200 px-2 py-1 rounded-full">
+                    {property}
+                  </span>
+                ))}
               </div>
-            )}
+              <div className="w-full h-0.5 bg-gradient-to-r from-yellow-400/20 to-purple-400/20 my-4 rounded-full" />
+            </div>
+            {/* Right: Forms Grid */}
+            <div className="flex-1 flex flex-col p-8 min-w-[260px]">
+              <h4 className="text-lg font-bold text-yellow-300 mb-4 text-center font-unbounded tracking-wide">Select Form(s)</h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+                {selectedCrystal.forms.map((form: CrystalForm) => {
+                  const selected = (selectedForms[form.name] || 0) > 0;
+                  return (
+                    <div
+                      key={form.name}
+                      className={`flex flex-col items-center glass bg-gradient-to-br from-purple-800/90 to-indigo-800/90 border-2 ${selected ? 'border-yellow-400 shadow-2xl scale-105' : 'border-purple-500/30'} rounded-2xl px-6 py-6 shadow-lg hover:shadow-2xl transition-all duration-200 focus-within:ring-2 focus-within:ring-yellow-400 relative group min-h-[180px] min-w-0 overflow-visible`}
+                    >
+                      <img src={form.image} alt={form.name} className="w-24 h-24 object-cover rounded-2xl border-2 border-yellow-400 shadow-lg bg-black/20 mb-3" />
+                      <div className="w-full flex flex-col items-center text-center mb-2">
+                        <div className="font-bold text-xl md:text-2xl text-yellow-200 mb-1 uppercase tracking-wide font-unbounded break-words leading-tight">{form.name}</div>
+                        <div className="text-yellow-400 font-extrabold text-lg md:text-xl mb-1">₹{form.price}</div>
+                        {form.description && <div className="text-sm text-purple-200 mb-2 text-center break-words italic leading-snug max-w-[220px] md:max-w-[260px]">{form.description}</div>}
+                      </div>
+                      <div className="flex items-center justify-center gap-3 mt-2 mb-1 w-full">
+                        <button
+                          type="button"
+                          aria-label={`Decrease quantity of ${form.name}`}
+                          className="w-9 h-9 flex items-center justify-center rounded-full bg-yellow-400 text-purple-900 font-bold hover:bg-yellow-300 transition text-xl shadow-lg border-2 border-yellow-300"
+                          onClick={() => {
+                            setSelectedForms(prev => {
+                              const qty = (prev[form.name] || 0) - 1;
+                              if (qty <= 0) {
+                                const { [form.name]: _, ...rest } = prev;
+                                return rest;
+                              }
+                              return { ...prev, [form.name]: qty };
+                            });
+                          }}
+                        >-</button>
+                        <span className="font-bold text-xl text-white w-10 text-center select-none drop-shadow-lg">{selectedForms[form.name] || 0}</span>
+                        <button
+                          type="button"
+                          aria-label={`Increase quantity of ${form.name}`}
+                          className="w-9 h-9 flex items-center justify-center rounded-full bg-yellow-400 text-purple-900 font-bold hover:bg-yellow-300 transition text-xl shadow-lg border-2 border-yellow-300"
+                          onClick={() => setSelectedForms(prev => ({ ...prev, [form.name]: (prev[form.name] || 0) + 1 }))}
+                        >+</button>
+                      </div>
+                      {selected && (
+                        <span className="absolute top-2 left-2 bg-yellow-400 text-purple-900 rounded-full p-1 shadow-lg z-10 border-2 border-white/40">
+                          <svg width="18" height="18" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7"/></svg>
+                        </span>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+              {Object.values(selectedForms).some(qty => qty > 0) && (
+                <div className="sticky bottom-0 left-0 right-0 bg-gradient-to-r from-yellow-400/90 to-orange-400/90 rounded-b-2xl p-4 mt-2 flex justify-center shadow-2xl z-10 animate-fadeIn">
+                  <button
+                    className="w-full max-w-xs bg-gradient-to-r from-purple-900 to-indigo-900 hover:from-purple-800 hover:to-indigo-800 py-3 rounded-xl text-yellow-300 font-extrabold text-lg shadow-xl transition-all duration-300 drop-shadow border-2 border-yellow-400/60 tracking-wide"
+                    onClick={() => {
+                      Object.entries(selectedForms).forEach(([formName, qty]) => {
+                        if (qty > 0) {
+                          const form = selectedCrystal.forms.find(f => f.name === formName);
+                          if (form) addToCart(selectedCrystal, form, qty);
+                        }
+                      });
+                      handleCloseFormModal();
+                    }}
+                  >
+                    Add Selected to Cart
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       )}
@@ -706,4 +765,13 @@ This gentle yet transformative modality helps you:
   );
 }
 
-export default App;
+export default function App() {
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<MainApp />} />
+        <Route path="/payment" element={<PaymentPage />} />
+      </Routes>
+    </BrowserRouter>
+  );
+}

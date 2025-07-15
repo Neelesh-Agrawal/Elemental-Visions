@@ -19,7 +19,7 @@ export const Cart: React.FC<CartProps> = ({
   onRemoveItem,
   onProceedToCheckout
 }) => {
-  const total = items.reduce((sum, item) => sum + (item.crystal.price * item.quantity), 0);
+  const total = items.reduce((sum, item) => sum + (item.form.price * item.quantity), 0);
 
   if (!isOpen) return null;
 
@@ -42,42 +42,43 @@ export const Cart: React.FC<CartProps> = ({
           <>
             <div className="space-y-4 mb-6">
               {items.map((item) => (
-                <div key={item.crystal.id} className="bg-black/30 rounded-lg p-4 border border-purple-500/20">
-                  <div className="flex items-center space-x-4">
-                    <img 
-                      src={item.crystal.image} 
-                      alt={item.crystal.name}
-                      className="w-16 h-16 object-cover rounded-lg"
-                    />
-                    <div className="flex-1">
-                      <h4 className="text-white font-semibold">{item.crystal.name} <span className="text-xs text-yellow-400 ml-2">- {item.form.name}</span></h4>
-                      <p className="text-purple-300 text-sm">{item.crystal.purpose}</p>
-                      <p className="text-yellow-400 font-semibold">₹{item.crystal.price}</p>
+                <div key={item.crystal.id + '-' + item.form.name} className="bg-black/30 rounded-lg p-4 border border-purple-500/20 flex items-center space-x-4">
+                  <img 
+                    src={item.crystal.image} 
+                    alt={item.crystal.name}
+                    className="w-20 h-20 object-cover rounded-lg"
+                  />
+                  <div className="flex-1 flex flex-col justify-between h-full">
+                    <div className="mb-2">
+                      <h4 className="text-white font-bold text-lg">{item.crystal.name}</h4>
+                      <span className="text-xs text-yellow-400 font-semibold tracking-wide block">Form: {item.form.name}</span>
+                      <p className="text-purple-300 text-sm mt-1">{item.crystal.purpose}</p>
+                      <span className="text-yellow-400 font-semibold text-base block mt-1">Price: ₹{item.form.price}</span>
+                      <span className="text-green-300 font-semibold text-base block mt-1">Subtotal: ₹{item.form.price * item.quantity}</span>
                     </div>
-                  </div>
-                  
-                  <div className="flex justify-between items-center mt-4">
-                    <div className="flex items-center space-x-2">
+                    <div className="flex items-center justify-between mt-2">
+                      <div className="flex items-center space-x-2">
+                        <button 
+                          onClick={() => onUpdateQuantity(item.crystal.id + '-' + item.form.name, Math.max(0, item.quantity - 1))}
+                          className="bg-purple-600 hover:bg-purple-700 p-1 rounded"
+                        >
+                          <Minus className="w-4 h-4" />
+                        </button>
+                        <span className="text-white px-3 text-lg font-bold">{item.quantity}</span>
+                        <button 
+                          onClick={() => onUpdateQuantity(item.crystal.id + '-' + item.form.name, item.quantity + 1)}
+                          className="bg-purple-600 hover:bg-purple-700 p-1 rounded"
+                        >
+                          <Plus className="w-4 h-4" />
+                        </button>
+                      </div>
                       <button 
-                        onClick={() => onUpdateQuantity(item.crystal.id, Math.max(0, item.quantity - 1))}
-                        className="bg-purple-600 hover:bg-purple-700 p-1 rounded"
+                        onClick={() => onRemoveItem(item.crystal.id + '-' + item.form.name)}
+                        className="text-red-400 hover:text-red-300 text-sm border border-red-400/30 rounded px-4 py-1 ml-4"
                       >
-                        <Minus className="w-4 h-4" />
-                      </button>
-                      <span className="text-white px-3">{item.quantity}</span>
-                      <button 
-                        onClick={() => onUpdateQuantity(item.crystal.id, item.quantity + 1)}
-                        className="bg-purple-600 hover:bg-purple-700 p-1 rounded"
-                      >
-                        <Plus className="w-4 h-4" />
+                        Remove
                       </button>
                     </div>
-                    <button 
-                      onClick={() => onRemoveItem(item.crystal.id)}
-                      className="text-red-400 hover:text-red-300 text-sm"
-                    >
-                      Remove
-                    </button>
                   </div>
                 </div>
               ))}

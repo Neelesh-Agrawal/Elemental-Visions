@@ -12,6 +12,8 @@ export interface Crystal {
   description: string;
   properties: string[];
   forms: CrystalForm[];
+  image?: string;
+  price?: number;
 }
 
 export interface CartItem {

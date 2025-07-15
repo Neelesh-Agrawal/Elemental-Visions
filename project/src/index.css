@@ -1,3 +1,35 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Unbounded:wght@700&display=swap');
+
+body {
+  font-family: 'Poppins', Arial, sans-serif;
+  background: linear-gradient(135deg, #2d0b4e 0%, #1a1a40 100%);
+  color: #fff;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Unbounded', 'Poppins', Arial, sans-serif;
+  letter-spacing: 0.02em;
+}
+
+button, .btn {
+  font-family: 'Poppins', Arial, sans-serif;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+}
+
+/* Glassmorphism utility */
+.glass {
+  background: rgba(255,255,255,0.08);
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.18);
+  backdrop-filter: blur(8px);
+  border-radius: 1.5rem;
+  border: 1.5px solid rgba(255,255,255,0.18);
+}
+
+/* Modern shadow for cards */
+.card-shadow {
+  box-shadow: 0 4px 32px 0 rgba(80, 0, 120, 0.18), 0 1.5px 8px 0 rgba(255, 200, 55, 0.08);
+}
