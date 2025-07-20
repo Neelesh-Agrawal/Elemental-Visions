@@ -11,7 +11,7 @@ interface CartProps {
   onProceedToCheckout: () => void;
 }
 
-export const Cart: React.FC<CartProps> = ({
+const Cart: React.FC<CartProps> = ({
   isOpen,
   onClose,
   items,
@@ -102,3 +102,5 @@ export const Cart: React.FC<CartProps> = ({
     </div>
   );
 };
+
+export default Cart;

@@ -1,0 +1,13 @@
+{
+  "name": "Palm Reading",
+  "description": "Explore your destiny through sacred palm line analysis. Discover your innate gifts and future pathways.",
+  "sessions": [
+    {
+      "id": "palm-basic",
+      "name": "Palm Reading Session",
+      "duration": "20 mins",
+      "price": 999,
+      "description": "Detailed reading of palm lines and mounts."
+    }
+  ]
+}

@@ -1,0 +1,27 @@
+{
+  "name": "Tarot Reading",
+  "description": "Navigate life's crossroads with symbolic guidance. Choose from different question packages with personalized spreads.",
+  "sessions": [
+    {
+      "id": "tarot-3q",
+      "name": "3 Questions Reading",
+      "duration": "10 mins",
+      "price": 699,
+      "description": "Perfect for quick insights on specific concerns."
+    },
+    {
+      "id": "tarot-5q",
+      "name": "1 tarot reading based on 1 aspect",
+      "duration": "20 mins",
+      "price": 901,
+      "description": "Comprehensive reading for multiple life areas like love, career, finance, etc."
+    },
+    {
+      "id": "tarot-full",
+      "name": "Full Session",
+      "duration": "30 mins",
+      "price": 1500,
+      "description": "A detailed reading for your life problems."
+    }
+  ]
+}
