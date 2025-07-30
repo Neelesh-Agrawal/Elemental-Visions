@@ -4,11 +4,13 @@ import { Footer } from '../components/Footer';
 import Cart from '../components/Cart';
 import CheckoutForm from '../components/CheckoutForm';
 import { CartItem } from '../types';
+import { useNavigate } from 'react-router-dom';
 
 const Checkout: React.FC = () => {
   const [cart, setCart] = useState<CartItem[]>([]); // You may want to lift this state up for global cart
   const [isCartOpen, setIsCartOpen] = useState(true);
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
+  const navigate = useNavigate();
 
   const updateCartQuantity = (compositeId: string, quantity: number) => {
     const [crystalId, formName] = compositeId.split('-');
@@ -55,7 +57,7 @@ const Checkout: React.FC = () => {
         total={getTotalPrice()}
         onOrderComplete={() => {
           setIsCheckoutOpen(false);
-          // You may want to navigate to payment page here
+          navigate('/payment', { state: { items: cart, total: getTotalPrice() } });
         }}
       />
       <Footer />

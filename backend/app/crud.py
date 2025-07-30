@@ -3,8 +3,28 @@ from fastapi import HTTPException
 from . import models, schemas
 
 def create_order(db: Session, order: schemas.OrderCreate):
-    db_order = models.Order(**order.dict())
+    db_order = models.Order(
+        customer_name=order.customer_name,
+        email=order.email,
+        phone=order.phone,
+        address=order.address,
+        total_amount=order.total_amount,
+        status=order.status,
+    )
     db.add(db_order)
+    db.commit()
+    db.refresh(db_order)
+
+    # Add order items
+    for item in order.items:
+        db_item = models.OrderItem(
+            order_id=db_order.id,
+            crystal=item.crystal,
+            form=item.form,
+            quantity=item.quantity,
+            unit_price=item.unit_price,
+        )
+        db.add(db_item)
     db.commit()
     db.refresh(db_order)
     return db_order

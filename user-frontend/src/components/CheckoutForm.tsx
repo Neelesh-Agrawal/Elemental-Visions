@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { CartItem } from '../types';
 
 interface CheckoutFormProps {
@@ -16,6 +16,8 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({
   total,
   onOrderComplete
 }) => {
+  if (!isOpen) return null;
+
   const [formData, setFormData] = useState({
     customer_name: '',
     email: '',
@@ -24,6 +26,68 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPayment, setShowPayment] = useState(false);
+
+  const gpayBtnRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    // Only run if Google Pay script is loaded and modal is open
+    if (window.google && window.google.payments && isOpen && gpayBtnRef.current) {
+      const paymentsClient = new window.google.payments.api.PaymentsClient({
+        environment: 'TEST', // Change to 'PRODUCTION' after approval
+      });
+
+      const paymentRequest = {
+        apiVersion: 2,
+        apiVersionMinor: 0,
+        allowedPaymentMethods: [{
+          type: 'UPI',
+          parameters: {
+            payeeVpa: 'your-upi-id@bank', // <-- Replace with your UPI ID
+            payeeName: 'Your Business Name', // <-- Replace with your business name
+          },
+          tokenizationSpecification: {
+            type: 'PAYMENT_GATEWAY',
+            parameters: {
+              gateway: 'upi',
+            },
+          },
+        }],
+        transactionInfo: {
+          totalPriceStatus: 'FINAL',
+          totalPrice: total.toString(),
+          currencyCode: 'INR',
+        },
+        merchantInfo: {
+          merchantName: 'Your Business Name', // <-- Replace with your business name
+        },
+      };
+
+      paymentsClient.isReadyToPay({ allowedPaymentMethods: paymentRequest.allowedPaymentMethods })
+        .then(function(response) {
+          if (response.result) {
+            const button = paymentsClient.createButton({
+              onClick: () => {
+                paymentsClient.loadPaymentData(paymentRequest)
+                  .then(paymentData => {
+                    // Handle payment success here
+                    console.log('Payment Success:', paymentData);
+                    alert('Payment successful!'); // You can trigger order completion here
+                  })
+                  .catch(err => {
+                    // Handle payment error here
+                    console.error('Payment Error:', err);
+                    alert('Payment failed or cancelled.');
+                  });
+              },
+              buttonColor: 'default',
+              buttonType: 'long',
+            });
+            gpayBtnRef.current.innerHTML = '';
+            gpayBtnRef.current.appendChild(button);
+          }
+        });
+    }
+  }, [total, isOpen]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -34,19 +98,25 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({
 		setIsSubmitting(true);
 
 		try {
-			const response = await fetch(`${process.env.API_URL}/orders/`, {
+			const orderItems = items.map(item => ({
+				crystal: item.crystal.name,
+				form: item.form.name,
+				quantity: item.quantity,
+				unit_price: item.form.price,
+			}));
+			const apiUrl = import.meta.env.VITE_API_URL;
+			const response = await fetch(`${apiUrl}/orders/`, {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
 				},
 				body: JSON.stringify({
-					customer_name: customerName,
-					email: email,
-					phone: phone,
-					address: address,
-					crystal: selectedCrystal,
-					form: selectedForm,
-					total_amount: totalAmount,
+					customer_name: formData.customer_name,
+					email: formData.email,
+					phone: formData.phone,
+					address: formData.address,
+					items: orderItems,
+					total_amount: total,
 					status: 'pending',
 				}),
 			});
@@ -152,6 +222,10 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({
 		</button>
 		</form>
 		)}
+		<div className="mt-6 flex flex-col items-center">
+          <div ref={gpayBtnRef}></div>
+          <span className="text-xs text-gray-400 mt-2">Pay securely with Google Pay</span>
+        </div>
 		</div>
 		</div>
 	);
