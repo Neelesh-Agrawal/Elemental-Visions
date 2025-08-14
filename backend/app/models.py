@@ -7,8 +7,10 @@ import enum
 class OrderStatus(enum.Enum):
     pending = "pending"
     paid = "paid"
+    processing = "processing"
     shipped = "shipped"
     delivered = "delivered"
+    rejected = "rejected"
 
 class Order(Base):
     __tablename__ = "orders"
@@ -35,3 +37,31 @@ class OrderItem(Base):
     unit_price = Column(Float, nullable=False)
 
     order = relationship("Order", back_populates="items")
+
+
+# New Service Models
+class Service(Base):
+    __tablename__ = "services"
+
+    id = Column(String, primary_key=True, index=True)  # Using String to match your interface
+    name = Column(String, nullable=False)
+    description = Column(Text, nullable=False)
+    base_price = Column(String, nullable=False)  # Keeping as String to match your interface
+    duration = Column(String, nullable=True)
+    type = Column(String, nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    sessions = relationship("ServiceSession", back_populates="service", cascade="all, delete-orphan")
+
+class ServiceSession(Base):
+    __tablename__ = "service_sessions"
+
+    id = Column(String, primary_key=True, index=True)  # Using String to match your interface
+    service_id = Column(String, ForeignKey("services.id"), nullable=False)
+    name = Column(String, nullable=False)
+    duration = Column(String, nullable=False)
+    price = Column(String, nullable=False)  # Using String to handle both number and string types
+    description = Column(Text, nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    service = relationship("Service", back_populates="sessions")

@@ -28,6 +28,13 @@ def read_orders(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
 def mark_order_as_paid(order_id: int, db: Session = Depends(get_db)):
     return crud.mark_order_as_paid(db=db, order_id=order_id)
 
+@router.patch("/orders/{order_id}/pending", response_model=schemas.Order)
+def mark_order_as_pending(order_id: int, db: Session = Depends(get_db)):
+    return crud.mark_order_as_pending(db=db, order_id=order_id)
+
+@router.patch("/orders/{order_id}/reject", response_model=schemas.Order)
+def mark_order_as_rejected(order_id: int, db: Session = Depends(get_db)):
+    return crud.mark_order_as_rejected(db=db, order_id=order_id)
 
 @router.patch("/orders/{order_id}/ship", response_model=schemas.Order)
 def mark_order_as_shipped_or_delivered(
