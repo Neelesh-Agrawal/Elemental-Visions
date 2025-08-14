@@ -1,89 +1,306 @@
-import React, { useState } from 'react';
-
-interface Session {
-  id: string;
-  name: string;
-  duration: string;
-  price: number | string;
-  description: string;
-}
+import React, { useState, useEffect } from 'react';
+import { ShoppingCart } from 'lucide-react';
+import { ServiceSession } from '../types';
 
 interface BookingModalProps {
   isOpen: boolean;
   onClose: () => void;
-  serviceType: string; // 'tarot', 'palm', 'karma', 'coaching', 'crystal'
+  serviceType: string;
   serviceName: string;
+  onAddToCart: (serviceType: string, serviceName: string, session: ServiceSession) => void;
 }
 
-// Import all service data
-import tarotData from '../data/services/tarot.json';
-import palmData from '../data/services/palm.json';
-import karmaData from '../data/services/karma.json';
-import coachingData from '../data/services/coaching.json';
-import crystalData from '../data/services/crystal.json';
-
-const serviceMap: Record<string, any> = {
-  tarot: tarotData,
-  palm: palmData,
-  karma: karmaData,
-  coaching: coachingData,
-  crystal: crystalData,
+// Service data based on your JSON files
+const serviceData: Record<string, any> = {
+  tarot: {
+    name: "Tarot Reading",
+    description: "Navigate life's crossroads with symbolic guidance. Choose from different question packages with personalized spreads.",
+    sessions: [
+      {
+        id: "tarot-3q",
+        name: "3 Questions Reading",
+        duration: "10 mins",
+        price: 699,
+        description: "Perfect for quick insights on specific concerns."
+      },
+      {
+        id: "tarot-5q",
+        name: "1 tarot reading based on 1 aspect",
+        duration: "20 mins",
+        price: 901,
+        description: "Comprehensive reading for multiple life areas like love, career, finance, etc."
+      },
+      {
+        id: "tarot-full",
+        name: "Full Session",
+        duration: "30 mins",
+        price: 1500,
+        description: "A detailed reading for your life problems."
+      }
+    ]
+  },
+  palm: {
+    name: "Palm Reading",
+    description: "Explore your destiny through sacred palm line analysis. Discover your innate gifts and future pathways.",
+    sessions: [
+      {
+        id: "palm-basic",
+        name: "Palm Reading Session",
+        duration: "20 mins",
+        price: 999,
+        description: "Detailed reading of palm lines and mounts."
+      }
+    ]
+  },
+  karma: {
+    name: "Karma Analysis",
+    description: "Get your Pending Karma Analysis done and understand the hidden lessons your soul is still carrying.",
+    sessions: [
+      {
+        id: "karma-basic",
+        name: "Karma Analysis Session",
+        duration: "30 mins",
+        price: 999,
+        description: "In-depth analysis of karmic patterns and soul lessons."
+      }
+    ]
+  },
+  coaching: {
+    name: "Life Coaching",
+    description: "Personalized coaching to help you achieve your goals, overcome obstacles, and transform your life.",
+    sessions: [
+      {
+        id: "coaching-15",
+        name: "15 Minutes Session",
+        duration: "15 mins",
+        price: 999,
+        description: "Quick consultation for specific goals."
+      },
+      {
+        id: "coaching-30",
+        name: "30 Minutes Session",
+        duration: "30 mins",
+        price: 1499,
+        description: "Comprehensive coaching with action plan."
+      }
+    ]
+  },
+  crystal: {
+    name: "Crystal Healing",
+    description: "Personalized crystal healing session with energy alignment, chakra balancing, and intention setting.",
+    sessions: [
+      {
+        id: "crystal-basic",
+        name: "Basic Crystal Healing",
+        duration: "20 mins",
+        price: 800,
+        description: "A gentle session for energy cleansing and balance."
+      },
+      {
+        id: "crystal-advanced",
+        name: "Advanced Crystal Healing",
+        duration: "40 mins",
+        price: 1500,
+        description: "Deep healing with advanced crystal layouts and chakra work."
+      }
+    ]
+  }
 };
 
-const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, serviceType, serviceName }) => {
-  if (!isOpen) return null;
-  const data = serviceMap[serviceType] || { sessions: [] };
-  const [selected, setSelected] = useState(data.sessions[0]?.id || '');
-  const selectedSession = data.sessions.find((s: Session) => s.id === selected) || data.sessions[0];
+const BookingModal: React.FC<BookingModalProps> = ({ 
+  isOpen, 
+  onClose, 
+  serviceType, 
+  serviceName, 
+  onAddToCart 
+}) => {
+  const [selected, setSelected] = useState<string>('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string>('');
 
-  // WhatsApp booking message
-  const getWhatsAppUrl = () => {
-    const msg = `Hi! I would like to book a ${serviceName} session: ${selectedSession.name} (${selectedSession.duration || ''}) for ₹${selectedSession.price}.`;
-    return `https://wa.me/919876543210?text=${encodeURIComponent(msg)}`;
+  // Get service data
+  const data = serviceData[serviceType] || { sessions: [] };
+
+  useEffect(() => {
+    if (data.sessions && data.sessions.length > 0 && !selected) {
+      setSelected(data.sessions[0].id);
+      console.log('🎯 Auto-selected first session:', data.sessions[0].id);
+    }
+  }, [data, selected]);
+
+  if (!isOpen) return null;
+
+  const selectedSession = data.sessions?.find((s: ServiceSession) => s.id === selected) || data.sessions?.[0];
+
+  console.log('📋 BookingModal render:', {
+    serviceType,
+    serviceName,
+    dataLoaded: !!data.sessions,
+    sessionsCount: data.sessions?.length || 0,
+    selectedSession,
+    loading,
+    error,
+    onAddToCart: typeof onAddToCart
+  });
+
+  const handleAddToCart = () => {
+    console.log('🛒 Add to cart button clicked');
+    console.log('📊 onAddToCart prop:', onAddToCart);
+    console.log('📊 typeof onAddToCart:', typeof onAddToCart);
+    console.log('📊 Current state:', { selectedSession, serviceType, serviceName });
+    
+    if (!onAddToCart) {
+      console.error('❌ onAddToCart prop is missing or undefined');
+      alert('Add to cart function not available. Please refresh the page and try again.');
+      return;
+    }
+
+    if (typeof onAddToCart !== 'function') {
+      console.error('❌ onAddToCart is not a function, it is:', typeof onAddToCart);
+      alert('Add to cart function is invalid. Please refresh the page and try again.');
+      return;
+    }
+
+    if (!selectedSession) {
+      console.error('❌ No session selected');
+      alert('Please select a session first');
+      return;
+    }
+
+    try {
+      console.log('📄 Calling onAddToCart with:', { serviceType, serviceName, selectedSession });
+      onAddToCart(serviceType, serviceName, selectedSession);
+      console.log('✅ onAddToCart called successfully');
+    } catch (error) {
+      console.error('❌ Error in handleAddToCart:', error);
+      alert('Error adding to cart. Please try again.');
+    }
   };
+
+  const getSelectionLabel = () => {
+    switch (serviceType) {
+      case 'tarot': return 'Choose Your Reading Type:';
+      case 'coaching': return 'Choose Session Duration:';
+      case 'palm': return 'Palm Reading Session:';
+      case 'karma': return 'Karma Analysis Session:';
+      case 'crystal': return 'Crystal Healing Session:';
+      default: return 'Choose Your Session:';
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
+        <div className="bg-gradient-to-br from-[#6a3fa0] to-[#2d0b4e] rounded-2xl p-6 max-w-lg w-full border border-purple-500/30 shadow-2xl">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-yellow-400 mx-auto mb-4"></div>
+            <h3 className="text-2xl font-bold text-white mb-2">Loading...</h3>
+            <p className="text-purple-200">Loading service options...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !data.sessions || data.sessions.length === 0) {
+    return (
+      <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
+        <div className="bg-gradient-to-br from-[#6a3fa0] to-[#2d0b4e] rounded-2xl p-6 max-w-lg w-full border border-purple-500/30 shadow-2xl">
+          <div className="flex justify-between items-center mb-6">
+            <h3 className="text-3xl font-extrabold text-white font-unbounded">Service Error</h3>
+            <button onClick={onClose} className="text-gray-300 hover:text-white text-3xl font-bold">&times;</button>
+          </div>
+          <p className="text-purple-200 mb-4">
+            {error || `Service data not found for ${serviceType}. Please check your service configuration.`}
+          </p>
+          <button
+            onClick={onClose}
+            className="w-full bg-gradient-to-r from-red-600 to-purple-600 hover:from-red-700 hover:to-purple-700 py-3 rounded-lg font-bold text-white text-lg transition-all duration-300"
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
       <div className="bg-gradient-to-br from-[#6a3fa0] to-[#2d0b4e] rounded-2xl p-6 max-w-lg w-full max-h-[90vh] overflow-y-auto border border-purple-500/30 shadow-2xl">
         <div className="flex justify-between items-center mb-6">
           <h3 className="text-3xl font-extrabold text-white flex items-center font-unbounded">
-            <span className="mr-2">🕒</span> Book {serviceName}
+            <span className="mr-2">🕊</span> Select {serviceName}
           </h3>
           <button onClick={onClose} className="text-gray-300 hover:text-white text-3xl font-bold">&times;</button>
         </div>
+
+        {/* Debug info - remove in production */}
+        
+        
         <div className="mb-6">
-          <p className="text-lg font-semibold text-purple-200 mb-2">
-            {serviceType === 'tarot' && 'Choose Your Reading Type:'}
-            {serviceType === 'coaching' && 'Choose Session Duration:'}
+          <p className="text-lg font-semibold text-purple-200 mb-4">
+            {getSelectionLabel()}
           </p>
+          
           <div className="space-y-4">
-            {data.sessions.map((session: Session) => (
+            {data.sessions.map((session: ServiceSession) => (
               <div
                 key={session.id}
-                className={`rounded-xl p-5 border transition-all duration-200 cursor-pointer ${selected === session.id ? 'border-yellow-400 bg-[#3d2466]/80' : 'border-transparent bg-[#2d0b4e]/60'} ${data.sessions.length === 1 ? 'pointer-events-none' : ''}`}
-                onClick={() => setSelected(session.id)}
+                className={`rounded-xl p-5 border transition-all duration-200 cursor-pointer ${
+                  selected === session.id 
+                    ? 'border-yellow-400 bg-[#3d2466]/80 ring-2 ring-yellow-400/30' 
+                    : 'border-transparent bg-[#2d0b4e]/60 hover:bg-[#3d2466]/60'
+                } ${data.sessions.length === 1 ? 'pointer-events-none border-yellow-400 bg-[#3d2466]/80' : ''}`}
+                onClick={() => {
+                  if (data.sessions.length > 1) {
+                    console.log('🎯 Session selected:', session.id);
+                    setSelected(session.id);
+                  }
+                }}
               >
-                <div className="flex justify-between items-center mb-1">
-                  <div className="text-xl sm:text-2xl font-bold text-white font-unbounded">{session.name}</div>
-                  <div className="text-lg font-bold text-yellow-400">₹{session.price}</div>
+                <div className="flex justify-between items-center mb-2">
+                  <div className="text-xl sm:text-2xl font-bold text-white font-unbounded">
+                    {session.name}
+                  </div>
+                  <div className="text-lg font-bold text-yellow-400">
+                    ₹{session.price}
+                  </div>
                 </div>
-                <div className="text-purple-200 text-base mb-1">{session.description}</div>
-                <div className="text-purple-300 text-sm">{session.duration}</div>
+                <div className="text-purple-200 text-base mb-2">
+                  {session.description}
+                </div>
+                <div className="text-purple-300 text-sm">
+                  Duration: {session.duration}
+                </div>
               </div>
             ))}
           </div>
         </div>
-        <a
-          href={getWhatsAppUrl()}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="block w-full mt-4 bg-gradient-to-r from-green-600 to-teal-600 hover:from-green-700 hover:to-teal-700 py-3 rounded-lg font-bold text-white text-lg text-center transition-all duration-300 shadow-lg"
-        >
-          <span className="inline-flex items-center justify-center gap-2">
-            <svg width="22" height="22" fill="currentColor" className="inline-block"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.198.297-.767.966-.94 1.164-.173.198-.347.223-.644.075-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.151-.174.2-.298.3-.497.099-.198.05-.372-.025-.52-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.5-.669-.51-.173-.007-.372-.009-.571-.009-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.363.709.306 1.262.489 1.694.626.712.227 1.36.195 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.288.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 5.617h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.999-3.648-.235-.374A9.86 9.86 0 0 1 .96 10.012C.96 4.771 5.729 0 11.004 0c2.652 0 5.144 1.037 7.019 2.921a9.825 9.825 0 0 1 2.925 7.006c-.003 5.234-4.772 9.995-10.006 9.995m8.413-18.407A10.944 10.944 0 0 0 11.004-1C4.934-1-.96 4.893-.96 10.012c0 1.77.462 3.504 1.34 5.034l-1.417 5.184a1.001 1.001 0 0 0 1.225 1.225l5.197-1.415A10.96 10.96 0 0 0 11.004 21c6.07 0 11.964-5.893 11.964-10.988 0-2.934-1.144-5.692-3.223-7.82"/></svg>
-            Book via WhatsApp
-          </span>
-        </a>
+
+        {selectedSession && (
+          <div className="border-t border-purple-500/30 pt-4">
+            <div className="mb-4 p-4 bg-black/30 rounded-lg">
+              <div className="flex justify-between items-center text-lg">
+                <span className="text-purple-200">Selected:</span>
+                <span className="text-white font-bold">{selectedSession.name}</span>
+              </div>
+              <div className="flex justify-between items-center text-lg mt-2">
+                <span className="text-purple-200">Price:</span>
+                <span className="text-yellow-400 font-bold">₹{selectedSession.price}</span>
+              </div>
+            </div>
+
+            <button
+              onClick={handleAddToCart}
+              className="block w-full bg-gradient-to-r from-teal-600 to-purple-600 hover:from-teal-700 hover:to-purple-700 py-3 rounded-lg font-bold text-white text-lg text-center transition-all duration-300 shadow-lg transform hover:scale-105"
+            >
+              <span className="inline-flex items-center justify-center gap-2">
+                <ShoppingCart className="w-5 h-5" />
+                Add to Cart
+              </span>
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
