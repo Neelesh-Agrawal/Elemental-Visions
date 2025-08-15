@@ -1,0 +1,20 @@
+{
+  "name": "Life Coaching",
+  "description": "Personalized coaching to help you achieve your goals, overcome obstacles, and transform your life.",
+  "sessions": [
+    {
+      "id": "coaching-15",
+      "name": "15 Minutes Session",
+      "duration": "15 mins",
+      "price": 999,
+      "description": "Quick consultation for specific goals."
+    },
+    {
+      "id": "coaching-30",
+      "name": "30 Minutes Session",
+      "duration": "30 mins",
+      "price": 1499,
+      "description": "Comprehensive coaching with action plan."
+    }
+  ]
+}

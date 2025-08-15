@@ -1,0 +1,20 @@
+{
+  "name": "Crystal Healing",
+  "description": "Personalized crystal healing session with energy alignment, chakra balancing, and intention setting.",
+  "sessions": [
+    {
+      "id": "crystal-basic",
+      "name": "Basic Crystal Healing",
+      "duration": "20 mins",
+      "price": 800,
+      "description": "A gentle session for energy cleansing and balance."
+    },
+    {
+      "id": "crystal-advanced",
+      "name": "Advanced Crystal Healing",
+      "duration": "40 mins",
+      "price": 1500,
+      "description": "Deep healing with advanced crystal layouts and chakra work."
+    }
+  ]
+}

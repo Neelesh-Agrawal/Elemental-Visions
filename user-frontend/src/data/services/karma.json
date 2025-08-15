@@ -1,0 +1,13 @@
+{
+  "name": "Karma Analysis",
+  "description": "Get your Pending Karma Analysis done and understand the hidden lessons your soul is still carrying.",
+  "sessions": [
+    {
+      "id": "karma-basic",
+      "name": "Karma Analysis Session",
+      "duration": "30 mins",
+      "price": 999,
+      "description": "In-depth analysis of karmic patterns and soul lessons."
+    }
+  ]
+}
