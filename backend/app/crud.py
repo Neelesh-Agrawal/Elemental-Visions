@@ -164,33 +164,3 @@ def get_service_sessions(db: Session, service_id: str):
     if not service:
         raise HTTPException(status_code=404, detail="Service not found")
     return service.sessions
-
-@router.post("/services/", response_model=schemas.Service)
-def create_service(service: schemas.ServiceCreate, db: Session = Depends(get_db)):
-    """Create a new service with its sessions"""
-    return crud.create_service(db=db, service=service)
-
-@router.get("/services/", response_model=List[schemas.Service])
-def read_services(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
-    """Get all services with their sessions"""
-    return crud.get_services(db, skip=skip, limit=limit)
-
-@router.get("/services/{service_id}", response_model=schemas.Service)
-def read_service(service_id: str, db: Session = Depends(get_db)):
-    """Get a specific service by ID"""
-    return crud.get_service_by_id(db=db, service_id=service_id)
-
-@router.put("/services/{service_id}", response_model=schemas.Service)
-def update_service(service_id: str, service: schemas.ServiceCreate, db: Session = Depends(get_db)):
-    """Update an existing service and its sessions"""
-    return crud.update_service(db=db, service_id=service_id, service_update=service)
-
-@router.delete("/services/{service_id}")
-def delete_service(service_id: str, db: Session = Depends(get_db)):
-    """Delete a service and all its sessions"""
-    return crud.delete_service(db=db, service_id=service_id)
-
-@router.get("/services/{service_id}/sessions", response_model=List[schemas.ServiceSession])
-def read_service_sessions(service_id: str, db: Session = Depends(get_db)):
-    """Get all sessions for a specific service"""
-    return crud.get_service_sessions(db=db, service_id=service_id)
