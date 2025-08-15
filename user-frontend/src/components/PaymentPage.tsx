@@ -20,11 +20,15 @@ declare global {
   }
 }
 
+<<<<<<< HEAD
 interface PaymentPageProps {
   orderType?: 'crystal' | 'service';
 }
 
 const PaymentPage: React.FC<PaymentPageProps> = ({ orderType = 'crystal' }) => {
+=======
+const PaymentPage: React.FC = () => {
+>>>>>>> 4fa3d9f04f846c48e9bc284634a30cc2d33ab7dc
   const location = useLocation();
   const navigate = useNavigate();
   const { items = [], total = 0 } = (location.state as any) || {};
@@ -177,7 +181,11 @@ const PaymentPage: React.FC<PaymentPageProps> = ({ orderType = 'crystal' }) => {
           Complete Your Payment
         </h1>
         <p className="text-purple-200 mt-2 text-lg">
+<<<<<<< HEAD
           Thank you for your {orderType === 'service' ? 'service booking' : 'order'}! Choose your preferred payment method.
+=======
+          Thank you for your order! Choose your preferred payment method.
+>>>>>>> 4fa3d9f04f846c48e9bc284634a30cc2d33ab7dc
         </p>
         {/* Payment Status Indicator */}
         <div className={`mt-4 inline-flex items-center px-4 py-2 rounded-full bg-gradient-to-r ${getStatusColor()} text-white font-semibold shadow-lg`}>
@@ -252,19 +260,30 @@ const PaymentPage: React.FC<PaymentPageProps> = ({ orderType = 'crystal' }) => {
         {/* Right: Order Summary */}
         <div className="w-full md:w-1/2 flex flex-col p-10 bg-white/10 backdrop-blur-lg shadow-2xl min-h-[400px] justify-center" data-aos="fade-left">
           <div className="mb-6">
+<<<<<<< HEAD
             <h3 className="text-2xl font-bold text-yellow-400 mb-4 tracking-wide drop-shadow">
               {orderType === 'service' ? 'Service Booking Summary' : 'Order Summary'}
             </h3>
             <ul className="divide-y divide-purple-500/20 bg-black/30 rounded-xl shadow-inner p-4">
               {items.length === 0 ? (
                 <li className="py-2 text-purple-200">No items in {orderType === 'service' ? 'booking' : 'order'}.</li>
+=======
+            <h3 className="text-2xl font-bold text-yellow-400 mb-4 tracking-wide drop-shadow">Order Summary</h3>
+            <ul className="divide-y divide-purple-500/20 bg-black/30 rounded-xl shadow-inner p-4">
+              {items.length === 0 ? (
+                <li className="py-2 text-purple-200">No items in order.</li>
+>>>>>>> 4fa3d9f04f846c48e9bc284634a30cc2d33ab7dc
               ) : (
                 items.map((item: any, idx: number) => (
                   <li key={item.crystal.id + '-' + item.form.name + '-' + idx} className="py-3 flex items-center justify-between">
                     <div>
                       <span className="font-semibold text-white text-lg">{item.crystal.name}</span>
                       <span className="text-xs text-yellow-400 ml-2">({item.form.name})</span>
+<<<<<<< HEAD
                       {orderType === 'crystal' && <span className="text-xs text-purple-300 ml-2">x {item.quantity}</span>}
+=======
+                      <span className="text-xs text-purple-300 ml-2">x {item.quantity}</span>
+>>>>>>> 4fa3d9f04f846c48e9bc284634a30cc2d33ab7dc
                     </div>
                     <div className="text-yellow-300 font-bold text-lg">₹{item.form.price * item.quantity}</div>
                   </li>

@@ -7,7 +7,11 @@ interface BookingModalProps {
   onClose: () => void;
   serviceType: string;
   serviceName: string;
+<<<<<<< HEAD
   onBookService: (serviceType: string, serviceName: string, session: ServiceSession) => void;
+=======
+  onAddToCart: (serviceType: string, serviceName: string, session: ServiceSession) => void;
+>>>>>>> 4fa3d9f04f846c48e9bc284634a30cc2d33ab7dc
 }
 
 // Service data based on your JSON files
@@ -112,12 +116,17 @@ const BookingModal: React.FC<BookingModalProps> = ({
   onClose, 
   serviceType, 
   serviceName, 
+<<<<<<< HEAD
   onBookService 
+=======
+  onAddToCart 
+>>>>>>> 4fa3d9f04f846c48e9bc284634a30cc2d33ab7dc
 }) => {
   const [selected, setSelected] = useState<string>('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>('');
 
+<<<<<<< HEAD
   // Debug logging
   console.log('🎯 BookingModal render:', {
     isOpen,
@@ -127,6 +136,8 @@ const BookingModal: React.FC<BookingModalProps> = ({
     onBookServiceExists: !!onBookService
   });
 
+=======
+>>>>>>> 4fa3d9f04f846c48e9bc284634a30cc2d33ab7dc
   // Get service data
   const data = serviceData[serviceType] || { sessions: [] };
 
@@ -141,6 +152,7 @@ const BookingModal: React.FC<BookingModalProps> = ({
 
   const selectedSession = data.sessions?.find((s: ServiceSession) => s.id === selected) || data.sessions?.[0];
 
+<<<<<<< HEAD
   const handleBookService = () => {
     console.log('🔄 handleBookService called, checking params:', {
       selectedSession,
@@ -150,10 +162,44 @@ const BookingModal: React.FC<BookingModalProps> = ({
     });
 
     if (!selectedSession) {
+=======
+  console.log('📋 BookingModal render:', {
+    serviceType,
+    serviceName,
+    dataLoaded: !!data.sessions,
+    sessionsCount: data.sessions?.length || 0,
+    selectedSession,
+    loading,
+    error,
+    onAddToCart: typeof onAddToCart
+  });
+
+  const handleAddToCart = () => {
+    console.log('🛒 Add to cart button clicked');
+    console.log('📊 onAddToCart prop:', onAddToCart);
+    console.log('📊 typeof onAddToCart:', typeof onAddToCart);
+    console.log('📊 Current state:', { selectedSession, serviceType, serviceName });
+    
+    if (!onAddToCart) {
+      console.error('❌ onAddToCart prop is missing or undefined');
+      alert('Add to cart function not available. Please refresh the page and try again.');
+      return;
+    }
+
+    if (typeof onAddToCart !== 'function') {
+      console.error('❌ onAddToCart is not a function, it is:', typeof onAddToCart);
+      alert('Add to cart function is invalid. Please refresh the page and try again.');
+      return;
+    }
+
+    if (!selectedSession) {
+      console.error('❌ No session selected');
+>>>>>>> 4fa3d9f04f846c48e9bc284634a30cc2d33ab7dc
       alert('Please select a session first');
       return;
     }
 
+<<<<<<< HEAD
     if (!onBookService || typeof onBookService !== 'function') {
       console.error('❌ onBookService is not a function:', {
         type: typeof onBookService, 
@@ -172,6 +218,15 @@ const BookingModal: React.FC<BookingModalProps> = ({
     } catch (error) {
       console.error('❌ Error in handleBookService:', error);
       alert('Error processing booking. Please try again.');
+=======
+    try {
+      console.log('📄 Calling onAddToCart with:', { serviceType, serviceName, selectedSession });
+      onAddToCart(serviceType, serviceName, selectedSession);
+      console.log('✅ onAddToCart called successfully');
+    } catch (error) {
+      console.error('❌ Error in handleAddToCart:', error);
+      alert('Error adding to cart. Please try again.');
+>>>>>>> 4fa3d9f04f846c48e9bc284634a30cc2d33ab7dc
     }
   };
 
@@ -232,6 +287,12 @@ const BookingModal: React.FC<BookingModalProps> = ({
           <button onClick={onClose} className="text-gray-300 hover:text-white text-3xl font-bold">&times;</button>
         </div>
 
+<<<<<<< HEAD
+=======
+        {/* Debug info - remove in production */}
+        
+        
+>>>>>>> 4fa3d9f04f846c48e9bc284634a30cc2d33ab7dc
         <div className="mb-6">
           <p className="text-lg font-semibold text-purple-200 mb-4">
             {getSelectionLabel()}
@@ -286,12 +347,20 @@ const BookingModal: React.FC<BookingModalProps> = ({
             </div>
 
             <button
+<<<<<<< HEAD
               onClick={handleBookService}
+=======
+              onClick={handleAddToCart}
+>>>>>>> 4fa3d9f04f846c48e9bc284634a30cc2d33ab7dc
               className="block w-full bg-gradient-to-r from-teal-600 to-purple-600 hover:from-teal-700 hover:to-purple-700 py-3 rounded-lg font-bold text-white text-lg text-center transition-all duration-300 shadow-lg transform hover:scale-105"
             >
               <span className="inline-flex items-center justify-center gap-2">
                 <ShoppingCart className="w-5 h-5" />
+<<<<<<< HEAD
                 Book Now
+=======
+                Add to Cart
+>>>>>>> 4fa3d9f04f846c48e9bc284634a30cc2d33ab7dc
               </span>
             </button>
           </div>

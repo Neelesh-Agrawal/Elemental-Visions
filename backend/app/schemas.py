@@ -1,5 +1,9 @@
 from pydantic import BaseModel, EmailStr
+<<<<<<< HEAD
 from typing import Optional, List, Union
+=======
+from typing import Optional, List
+>>>>>>> 4fa3d9f04f846c48e9bc284634a30cc2d33ab7dc
 from datetime import datetime
 from enum import Enum
 
@@ -24,7 +28,11 @@ class OrderItem(OrderItemBase):
     id: int
 
     class Config:
+<<<<<<< HEAD
         from_attributes = True
+=======
+        orm_mode = True
+>>>>>>> 4fa3d9f04f846c48e9bc284634a30cc2d33ab7dc
 
 class OrderBase(BaseModel):
     customer_name: str
@@ -43,7 +51,11 @@ class Order(OrderBase):
     items: List[OrderItem] = []
 
     class Config:
+<<<<<<< HEAD
         from_attributes = True
+=======
+        orm_mode = True
+>>>>>>> 4fa3d9f04f846c48e9bc284634a30cc2d33ab7dc
 
 class ServiceSessionBase(BaseModel):
     id: str
@@ -60,7 +72,11 @@ class ServiceSession(ServiceSessionBase):
     created_at: Optional[datetime] = None
 
     class Config:
+<<<<<<< HEAD
         from_attributes = True
+=======
+        orm_mode = True
+>>>>>>> 4fa3d9f04f846c48e9bc284634a30cc2d33ab7dc
 
 class ServiceBase(BaseModel):
     id: str
@@ -78,6 +94,7 @@ class Service(ServiceBase):
     sessions: List[ServiceSession] = []
 
     class Config:
+<<<<<<< HEAD
         from_attributes = True
 
 # Service Booking Schemas
@@ -113,3 +130,7 @@ class ServiceBooking(ServiceBookingBase):
 
     class Config:
         from_attributes = True
+=======
+        orm_mode = True
+
+>>>>>>> 4fa3d9f04f846c48e9bc284634a30cc2d33ab7dc

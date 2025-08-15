@@ -88,5 +88,9 @@ export interface BookingModalProps {
   onClose: () => void;
   serviceType: string;
   serviceName: string;
+<<<<<<< HEAD
   onBookService: (serviceType: string, serviceName: string, session: ServiceSession) => void;
+=======
+  onAddToCart: (serviceType: string, serviceName: string, session: ServiceSession) => void;
+>>>>>>> 4fa3d9f04f846c48e9bc284634a30cc2d33ab7dc
 }

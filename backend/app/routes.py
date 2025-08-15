@@ -42,6 +42,7 @@ def mark_order_as_shipped_or_delivered(
 ):
     return crud.update_shipment_status(db=db, order_id=order_id, status=status)
 
+<<<<<<< HEAD
 # Service Booking Routes
 @router.post("/service-bookings/", response_model=schemas.ServiceBooking)
 def create_service_booking(booking: schemas.ServiceBookingCreate, db: Session = Depends(get_db)):
@@ -63,3 +64,5 @@ def mark_service_booking_as_pending(booking_id: int, db: Session = Depends(get_d
 def mark_service_booking_as_rejected(booking_id: int, db: Session = Depends(get_db)):
     return crud.mark_service_booking_as_rejected(db=db, booking_id=booking_id)
 
+=======
+>>>>>>> 4fa3d9f04f846c48e9bc284634a30cc2d33ab7dc
