@@ -1,25 +1,51 @@
-export interface CrystalForm {
-  name: string; // e.g., Bracelet, Tumble, Tree, Pendant, Raw
-  price: number;
-  image: string;
-  description?: string;
-}
-
+// Crystal and Service Types
 export interface Crystal {
   id: string;
   name: string;
+  image: string;
   purpose: string;
   description: string;
-  properties: string[];
-  forms: CrystalForm[];
-  image?: string;
   price?: number;
+  category?: string;
+}
+
+export interface CrystalForm {
+  name: string;
+  price: number;
+  description?: string;
 }
 
 export interface CartItem {
   crystal: Crystal;
   form: CrystalForm;
   quantity: number;
+  type: 'crystal' | 'service';
+}
+
+export interface ServiceSession {
+  id: string;
+  name: string;
+  duration: string;
+  price: number | string;
+  description: string;
+}
+
+export interface Service {
+  id: string;
+  name: string;
+  description: string;
+  basePrice: string;
+  duration?: string;
+  type: string;
+  sessions: ServiceSession[];
+}
+
+// Order Types
+export interface OrderItem {
+  crystal: string;
+  form: string;
+  quantity: number;
+  unit_price: number;
 }
 
 export interface Order {
@@ -28,24 +54,43 @@ export interface Order {
   email: string;
   phone: string;
   address: string;
-  items: CartItem[];
+  items: OrderItem[];
   total_amount: number;
-  status: 'pending' | 'paid' | 'shipped' | 'delivered';
+  status: 'pending' | 'confirmed' | 'completed' | 'cancelled';
   created_at?: string;
 }
 
-export interface TarotSlot {
-  id: string;
-  name: string;
-  duration: string;
-  price: number;
-  description: string;
+// Component Props
+export interface NavbarProps {
+  cartCount: number;
+  onCartClick: () => void;
 }
 
-export interface CoachingSlot {
-  id: string;
-  name: string;
-  duration: string;
-  price: number;
-  description: string;
+export interface CartProps {
+  isOpen: boolean;
+  onClose: () => void;
+  items: CartItem[];
+  onUpdateQuantity: (compositeId: string, quantity: number) => void;
+  onRemoveItem: (compositeId: string) => void;
+  onProceedToCheckout: () => void;
+}
+
+export interface CheckoutFormProps {
+  isOpen: boolean;
+  onClose: () => void;
+  items: CartItem[];
+  total: number;
+  onOrderComplete: () => void;
+}
+
+export interface BookingModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  serviceType: string;
+  serviceName: string;
+<<<<<<< HEAD
+  onBookService: (serviceType: string, serviceName: string, session: ServiceSession) => void;
+=======
+  onAddToCart: (serviceType: string, serviceName: string, session: ServiceSession) => void;
+>>>>>>> 4fa3d9f04f846c48e9bc284634a30cc2d33ab7dc
 }
