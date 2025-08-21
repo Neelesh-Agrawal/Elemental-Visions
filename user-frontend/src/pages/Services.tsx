@@ -1,17 +1,9 @@
-<<<<<<< HEAD
-import React, { useState, useEffect } from 'react';
-import Navbar from '../components/Navbar';
-import { Footer } from '../components/Footer';
-import BookingModal from '../components/BookingModal';
-import ServiceCheckoutForm from '../components/ServiceCheckoutForm';
-=======
 import React, { useState, useEffect, useCallback } from 'react';
 import Navbar from '../components/Navbar';
 import { Footer } from '../components/Footer';
 import Cart from '../components/Cart';
 import CheckoutForm from '../components/CheckoutForm';
 import BookingModal from '../components/BookingModal';
->>>>>>> 4fa3d9f04f846c48e9bc284634a30cc2d33ab7dc
 import { ChevronRight, Star, Eye, Sparkles, Heart, Gem } from 'lucide-react';
 import { CartItem, ServiceSession } from '../types';
 import { useNavigate } from 'react-router-dom';
@@ -21,11 +13,7 @@ const services = [
     icon: <Star className="w-8 h-8" />,
     title: "Tarot Readings",
     description: "Navigate life's crossroads with symbolic guidance. Choose from different question packages with personalized spreads.",
-<<<<<<< HEAD
-    basePrice: "From ₹699",
-=======
     basePrice: "From ₹600",
->>>>>>> 4fa3d9f04f846c48e9bc284634a30cc2d33ab7dc
     duration: "10-30 mins",
     type: 'tarot'
   },
@@ -42,10 +30,6 @@ const services = [
     title: "Karma Analysis",
     description: "Curious about the karmic patterns holding you back?\nGet your Pending Karma Analysis done and understand the hidden lessons your soul is still carrying",
     basePrice: "₹999",
-<<<<<<< HEAD
-    duration: "30 mins",
-=======
->>>>>>> 4fa3d9f04f846c48e9bc284634a30cc2d33ab7dc
     type: 'karma'
   },
   {
@@ -60,28 +44,12 @@ const services = [
     icon: <Gem className="w-8 h-8" />,
     title: "Crystal Healing",
     description: "In a Crystal Healing Session, I use intuitively selected crystals to cleanse, balance, and activate your energy centers (chakras).\nThis gentle yet transformative modality helps you:\n\n🔮 Release emotional blocks\n💖 Heal past traumas\n🧘‍♀️ Regain energetic balance\n🌈 Strengthen aura and spiritual connection\n🌿 Feel lighter, clearer, and more aligned",
-<<<<<<< HEAD
-    basePrice: "From ₹800",
-    duration: "20-40 mins",
-=======
     duration: "Varies",
->>>>>>> 4fa3d9f04f846c48e9bc284634a30cc2d33ab7dc
     type: 'crystal'
   }
 ];
 
 const Services: React.FC = () => {
-<<<<<<< HEAD
-  const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
-  const [isServiceCheckoutOpen, setIsServiceCheckoutOpen] = useState(false);
-  const [selectedService, setSelectedService] = useState({ type: '', name: '' });
-  const [selectedServiceData, setSelectedServiceData] = useState<CartItem | null>(null);
-  const navigate = useNavigate();
-
-  // Handle service booking from modal
-  const handleBookService = (serviceType: string, serviceName: string, session: ServiceSession) => {
-    console.log('🎯 handleBookService called with:', { serviceType, serviceName, session });
-=======
   const [cart, setCart] = useState<CartItem[]>([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
@@ -116,7 +84,6 @@ const Services: React.FC = () => {
   // Define handleAddToCart function as a regular function first
   const handleAddToCartInternal = (serviceType: string, serviceName: string, session: ServiceSession) => {
     console.log('🔍 handleAddToCart called with:', { serviceType, serviceName, session });
->>>>>>> 4fa3d9f04f846c48e9bc284634a30cc2d33ab7dc
     
     if (!serviceType || !serviceName || !session) {
       console.error('❌ Missing required parameters:', { serviceType, serviceName, session });
@@ -125,11 +92,7 @@ const Services: React.FC = () => {
     }
     
     try {
-<<<<<<< HEAD
-      // Convert price to number if it's a string
-=======
       // Convert price to number
->>>>>>> 4fa3d9f04f846c48e9bc284634a30cc2d33ab7dc
       const price = typeof session.price === 'string' ? 
         parseInt(session.price.replace(/[^\d]/g, '')) : 
         Number(session.price);
@@ -142,69 +105,22 @@ const Services: React.FC = () => {
       
       console.log('💰 Processed price:', price);
 
-<<<<<<< HEAD
-      // Create service item for checkout
-      const serviceItem: CartItem = {
-=======
       const newItem: CartItem = {
->>>>>>> 4fa3d9f04f846c48e9bc284634a30cc2d33ab7dc
         crystal: {
           id: `service-${serviceType}-${session.id}`,
           name: serviceName,
           image: '/api/placeholder/300/200',
           purpose: session.name,
-<<<<<<< HEAD
-          description: session.description || `${serviceName} - ${session.name}`
-        },
-        form: {
-          name: session.duration || 'Standard Session',
-=======
           description: session.description
         },
         form: {
           name: session.duration || 'Standard',
->>>>>>> 4fa3d9f04f846c48e9bc284634a30cc2d33ab7dc
           price: price
         },
         quantity: 1,
         type: 'service'
       };
 
-<<<<<<< HEAD
-      console.log('🆕 Service item created:', serviceItem);
-
-      // Store the service data and open checkout
-      setSelectedServiceData(serviceItem);
-      setIsBookingModalOpen(false);
-      setIsServiceCheckoutOpen(true);
-      
-      console.log('✅ Service booking flow started');
-      
-    } catch (error) {
-      console.error('❌ Error processing service booking:', error);
-      alert('Error processing service booking. Please try again.');
-    }
-  };
-
-  const openBookingModal = (type: string, title: string) => {
-    console.log('📋 Opening booking modal for:', { type, title });
-    setSelectedService({ type, name: title });
-    setIsBookingModalOpen(true);
-  };
-
-  const handleServiceOrderComplete = () => {
-    console.log('🎉 Service order completed with data:', selectedServiceData);
-    if (selectedServiceData) {
-      setIsServiceCheckoutOpen(false);
-      navigate('/payment', { 
-        state: { 
-          items: [selectedServiceData], 
-          total: selectedServiceData.form.price,
-          orderType: 'service' 
-        } 
-      });
-    }
-=======
       console.log('🆕 New item created:', newItem);
 
       setCart(prevCart => {
@@ -304,7 +220,6 @@ const Services: React.FC = () => {
     console.log('🎉 Order completed with cart:', cart);
     setIsCheckoutOpen(false);
     navigate('/payment', { state: { items: cart, total: getTotalPrice() } });
->>>>>>> 4fa3d9f04f846c48e9bc284634a30cc2d33ab7dc
   };
 
   const handleCloseBookingModal = () => {
@@ -312,36 +227,6 @@ const Services: React.FC = () => {
     setIsBookingModalOpen(false);
   };
 
-<<<<<<< HEAD
-  const handleCloseServiceCheckout = () => {
-    console.log('📋 Closing service checkout');
-    setIsServiceCheckoutOpen(false);
-    setSelectedServiceData(null);
-  };
-
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-indigo-900 to-black text-white overflow-x-hidden">
-      <Navbar cartCount={0} onCartClick={() => {}} />
-
-      {/* BookingModal */}
-      <BookingModal
-        isOpen={isBookingModalOpen}
-        onClose={handleCloseBookingModal}
-        serviceType={selectedService.type}
-        serviceName={selectedService.name}
-        onBookService={handleBookService}
-      />
-
-      {/* ServiceCheckoutForm */}
-      <ServiceCheckoutForm
-        isOpen={isServiceCheckoutOpen}
-        onClose={handleCloseServiceCheckout}
-        items={selectedServiceData ? [selectedServiceData] : []}
-        total={selectedServiceData ? selectedServiceData.form.price : 0}
-        onOrderComplete={handleServiceOrderComplete}
-      />
-
-=======
   // Debug: Log the function reference when component renders
   console.log('🔧 Services component render - handleAddToCart function:', handleAddToCart);
   console.log('🔧 Services component render - typeof handleAddToCart:', typeof handleAddToCart);
@@ -420,7 +305,6 @@ const Services: React.FC = () => {
         <div>Function Valid: {typeof handleAddToCart === 'function' ? 'YES' : 'NO'}</div>
       </div>
 
->>>>>>> 4fa3d9f04f846c48e9bc284634a30cc2d33ab7dc
       <section id="services" className="py-20 px-4" data-aos="fade-up">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
@@ -451,19 +335,11 @@ const Services: React.FC = () => {
                   <button 
                     onClick={() => {
                       console.log('🎯 Service button clicked:', service.type, service.title);
-<<<<<<< HEAD
-                      openBookingModal(service.type, service.title);
-                    }}
-                    className="w-full bg-gradient-to-r from-teal-600 to-purple-600 hover:from-teal-700 hover:to-purple-700 py-3 rounded-lg font-semibold transition-all duration-300 flex items-center justify-center"
-                  >
-                    Book Now
-=======
                       handleBookService(service.type, service.title);
                     }}
                     className="w-full bg-gradient-to-r from-teal-600 to-purple-600 hover:from-teal-700 hover:to-purple-700 py-3 rounded-lg font-semibold transition-all duration-300 flex items-center justify-center"
                   >
                     Select Service
->>>>>>> 4fa3d9f04f846c48e9bc284634a30cc2d33ab7dc
                     <ChevronRight className="w-4 h-4 ml-2" />
                   </button>
                 </div>
