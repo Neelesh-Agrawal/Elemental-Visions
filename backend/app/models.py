@@ -64,7 +64,6 @@ class ServiceSession(Base):
     description = Column(Text, nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
-<<<<<<< HEAD
     service = relationship("Service", back_populates="sessions")
 
 # Service Booking Models
@@ -92,6 +91,3 @@ class ServiceBookingItem(Base):
     unit_price = Column(Float, nullable=False)
 
     booking = relationship("ServiceBooking", back_populates="items")
-=======
-    service = relationship("Service", back_populates="sessions")
->>>>>>> 4fa3d9f04f846c48e9bc284634a30cc2d33ab7dc
