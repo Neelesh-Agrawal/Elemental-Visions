@@ -20,10 +20,25 @@ declare global {
   }
 }
 
-const PaymentPage: React.FC = () => {
-  const location = useLocation();
+interface PaymentPageProps {
+  items?: any[];
+  total?: number;
+  bookingData?: any;
+  isService?: boolean;
+}
+
+const PaymentPage: React.FC<PaymentPageProps> = ({ 
+  items = [], 
+  total = 0, 
+  bookingData = null, 
+  isService = false 
+}) => {
   const navigate = useNavigate();
-  const { items = [], total = 0 } = (location.state as any) || {};
+  
+  // Use service booking total if it's a service, otherwise use items total
+  const finalTotal = isService && bookingData ? bookingData.total : total;
+  
+  console.log('💳 PaymentPage props:', { items, total, bookingData, isService, finalTotal });
 
   const [isGooglePayReady, setIsGooglePayReady] = useState(false);
   const [paymentStatus, setPaymentStatus] = useState<'idle' | 'processing' | 'success' | 'error'>('idle');
@@ -54,10 +69,10 @@ const PaymentPage: React.FC = () => {
     };
 
     loadGooglePayScript();
-  }, [total]);
+  }, [finalTotal]);
 
   const initializeGooglePay = () => {
-    if (!window.google?.payments || total <= 0) return;
+    if (!window.google?.payments || finalTotal <= 0) return;
 
     const paymentsClient = new window.google.payments.api.PaymentsClient({
       environment: 'TEST' // Change to 'PRODUCTION' for live payments
@@ -78,7 +93,7 @@ const PaymentPage: React.FC = () => {
       ],
       transactionInfo: {
         totalPriceStatus: 'FINAL',
-        totalPrice: total.toString(),
+        totalPrice: finalTotal.toString(),
         currencyCode: 'INR',
       },
       merchantInfo: {
@@ -136,7 +151,7 @@ const PaymentPage: React.FC = () => {
 
   // Alternative UPI payment handler for direct UPI apps
   const handleUPIPayment = () => {
-    const upiUrl = `upi://pay?pa=elementalvisions@upi&pn=Elemental Visions&am=${total}&cu=INR&tn=Order Payment`;
+    const upiUrl = `upi://pay?pa=elementalvisions@upi&pn=Elemental Visions&am=${finalTotal}&cu=INR&tn=Order Payment`;
     // Try to open UPI app
     const link = document.createElement('a');
     link.href = upiUrl;
@@ -208,7 +223,7 @@ const PaymentPage: React.FC = () => {
               <div className="p-3 bg-gradient-to-br from-yellow-400/30 to-orange-400/10 shadow-xl border-4 border-yellow-400/40 rounded-2xl flex justify-center items-center"
                 style={{ width: 'max-content', minWidth: '240px', minHeight: '240px' }}>
                 <img
-                  src={`https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=upi://pay?pa=elementalvisions@upi&pn=Elemental Visions&am=${total}&cu=INR&tn=Order Payment`}
+                  src={`https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=upi://pay?pa=elementalvisions@upi&pn=Elemental Visions&am=${finalTotal}&cu=INR&tn=Order Payment`}
                   alt="UPI QR Code"
                   className="w-56 h-56 rounded-xl shadow-2xl border-4 border-yellow-400/80"
                 />
@@ -247,10 +262,39 @@ const PaymentPage: React.FC = () => {
 
         {/* Right: Order Summary */}
         <div className="w-full md:w-1/2 flex flex-col p-10 bg-white/10 backdrop-blur-lg shadow-2xl min-h-[400px] justify-center" data-aos="fade-left">
+          {/* Customer Info for Service Bookings */}
+          {isService && bookingData && (
+            <div className="mb-6">
+              <h3 className="text-xl font-bold text-white mb-3">Booking Details</h3>
+              <div className="bg-black/30 rounded-xl p-4">
+                <div className="text-sm text-purple-200 mb-1">
+                  <span className="font-semibold">Customer:</span> {bookingData.customer.customer_name}
+                </div>
+                <div className="text-sm text-purple-200 mb-1">
+                  <span className="font-semibold">Email:</span> {bookingData.customer.email}
+                </div>
+                <div className="text-sm text-purple-200">
+                  <span className="font-semibold">Phone:</span> {bookingData.customer.phone}
+                </div>
+              </div>
+            </div>
+          )}
+          
           <div className="mb-6">
-            <h3 className="text-2xl font-bold text-yellow-400 mb-4 tracking-wide drop-shadow">Order Summary</h3>
+            <h3 className="text-2xl font-bold text-yellow-400 mb-4 tracking-wide drop-shadow">
+              {isService ? 'Service Summary' : 'Order Summary'}
+            </h3>
             <ul className="divide-y divide-purple-500/20 bg-black/30 rounded-xl shadow-inner p-4">
-              {items.length === 0 ? (
+              {isService && bookingData ? (
+                <li className="py-3 flex items-center justify-between">
+                  <div>
+                    <span className="font-semibold text-white text-lg">{bookingData.service.name}</span>
+                    <span className="text-xs text-yellow-400 ml-2">({bookingData.service.session})</span>
+                    <div className="text-xs text-purple-300 mt-1">{bookingData.service.duration}</div>
+                  </div>
+                  <div className="text-yellow-300 font-bold text-lg">₹{bookingData.service.price}</div>
+                </li>
+              ) : items.length === 0 ? (
                 <li className="py-2 text-purple-200">No items in order.</li>
               ) : (
                 items.map((item: any, idx: number) => (
@@ -269,7 +313,7 @@ const PaymentPage: React.FC = () => {
           <div className="mt-auto">
             <div className="bg-gradient-to-r from-yellow-400/20 to-orange-400/20 rounded-xl p-6 flex justify-between items-center shadow-lg border-2 border-yellow-400/30">
               <span className="text-xl font-bold text-white">Total:</span>
-              <span className="text-3xl font-extrabold text-yellow-400 drop-shadow">₹{total}</span>
+              <span className="text-3xl font-extrabold text-yellow-400 drop-shadow">₹{finalTotal}</span>
             </div>
             <button
               onClick={() => navigate('/')}

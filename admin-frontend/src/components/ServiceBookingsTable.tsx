@@ -23,7 +23,7 @@ interface ServiceBooking {
 }
 
 const FEEDBACK_FORM_LINK = 'https://forms.gle/your-feedback-form-link';
-const API_BASE_URL = import.meta.env.VITE_API_URL;
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
 const ServiceBookingsTable: React.FC = () => {
   const [bookings, setBookings] = useState<ServiceBooking[]>([]);
@@ -97,7 +97,11 @@ const ServiceBookingsTable: React.FC = () => {
         )
       );
       
-      setStatusSelections(prev => ({ ...prev, [bookingId]: undefined }));
+      setStatusSelections(prev => {
+        const newSelections = { ...prev };
+        delete newSelections[bookingId];
+        return newSelections;
+      });
       
       console.log(`Service booking ${newStatus} for booking ${bookingId} - User will be notified`);
     } catch (err) {

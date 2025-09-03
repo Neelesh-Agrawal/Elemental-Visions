@@ -7,6 +7,8 @@ import ServiceCard from '../components/ServiceCard';
 import CrystalCard from '../components/CrystalCard';
 import TestimonialCard from '../components/TestimonialCard';
 import BookingModal from '../components/BookingModal';
+import ServiceBookingModal from '../components/ServiceBookingModal';
+import ServiceBookingForm, { ServiceBookingData } from '../components/ServiceBookingForm';
 import Cart from '../components/Cart';
 import CheckoutForm from '../components/CheckoutForm';
 import AOS from 'aos';
@@ -205,8 +207,15 @@ const CrystalFormModal: React.FC<{
 
 const Home: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
+
   const [bookingService, setBookingService] = useState<{ type: string; name: string } | null>(null);
+  const [isServiceBookingModalOpen, setIsServiceBookingModalOpen] = useState(false);
+  const [isServiceBookingFormOpen, setIsServiceBookingFormOpen] = useState(false);
+  const [selectedServiceForBooking, setSelectedServiceForBooking] = useState<{
+    serviceType: string;
+    serviceName: string;
+    session: any;
+  } | null>(null);
   const [isCrystalModalOpen, setIsCrystalModalOpen] = useState(false);
   const [selectedCrystal, setSelectedCrystal] = useState<any>(null);
   const [crystalScrollPosition, setCrystalScrollPosition] = useState(0);
@@ -235,7 +244,100 @@ const Home: React.FC = () => {
   // Handlers for booking
   const handleBookService = (type: string, name: string) => {
     setBookingService({ type, name });
-    setIsBookingModalOpen(true);
+    setIsServiceBookingModalOpen(true);
+  };
+
+  // Handle service booking (Book Now)
+  const handleServiceBookNow = (serviceType: string, serviceName: string, session: any) => {
+    console.log('📅 Service book now called with:', { serviceType, serviceName, session });
+    
+    setSelectedServiceForBooking({
+      serviceType,
+      serviceName,
+      session
+    });
+    
+    setIsServiceBookingModalOpen(false);
+    setIsServiceBookingFormOpen(true);
+  };
+
+  // Handle service booking form submission
+  const handleServiceBookingSubmit = async (bookingData: ServiceBookingData) => {
+    console.log('📦 Service booking submission:', bookingData);
+    
+    try {
+      // Prepare service booking data for backend
+      const orderData = {
+        service_name: bookingData.serviceName,
+        session_name: bookingData.selectedSession.name,
+        quantity: 1,
+        unit_price: bookingData.total_amount
+      };
+
+      console.log('📦 Preparing service booking:', {
+        customer: {
+          customer_name: bookingData.customer_name,
+          email: bookingData.email,
+          phone: bookingData.phone
+        },
+        items: [orderData],
+        total: bookingData.total_amount
+      });
+
+      // Call API endpoint for service bookings
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+      const response = await fetch(`${apiUrl}/service-bookings/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          customer_name: bookingData.customer_name,
+          email: bookingData.email,
+          phone: bookingData.phone,
+          items: [orderData],
+          total_amount: bookingData.total_amount,
+          status: 'pending'
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || 'Failed to place service booking.');
+      }
+
+      const data = await response.json();
+      console.log('✅ Service booking created:', data);
+
+      // Close form and redirect to payment
+      setIsServiceBookingFormOpen(false);
+      
+      // Navigate to payment with service booking data
+      navigate('/payment', { 
+        state: { 
+          bookingData: {
+            customer: {
+              customer_name: bookingData.customer_name,
+              email: bookingData.email,
+              phone: bookingData.phone
+            },
+            service: {
+              name: bookingData.serviceName,
+              session: bookingData.selectedSession.name,
+              duration: bookingData.selectedSession.duration,
+              price: bookingData.total_amount
+            },
+            total: bookingData.total_amount,
+            booking_id: data.id || 'temp-' + Date.now()
+          },
+          isService: true
+        } 
+      });
+      
+    } catch (error) {
+      console.error('❌ Service booking error:', error);
+      alert(`Error placing service booking: ${error.message}. Please try again.`);
+    }
   };
   const handleBookCrystal = (crystal: Crystal) => {
     setCrystalForModal(crystal);
@@ -510,13 +612,26 @@ const Home: React.FC = () => {
           </div>
         </div>
       </section>
-      {/* Booking Modal for Services */}
+      {/* Service Booking Modal - New booking flow */}
       {bookingService && (
-        <BookingModal
-          isOpen={isBookingModalOpen}
-          onClose={() => setIsBookingModalOpen(false)}
+        <ServiceBookingModal
+          isOpen={isServiceBookingModalOpen}
+          onClose={() => setIsServiceBookingModalOpen(false)}
           serviceType={bookingService.type}
           serviceName={bookingService.name}
+          onBookNow={handleServiceBookNow}
+        />
+      )}
+
+      {/* Service Booking Form */}
+      {isServiceBookingFormOpen && selectedServiceForBooking && (
+        <ServiceBookingForm
+          isOpen={isServiceBookingFormOpen}
+          onClose={() => setIsServiceBookingFormOpen(false)}
+          serviceType={selectedServiceForBooking.serviceType}
+          serviceName={selectedServiceForBooking.serviceName}
+          selectedSession={selectedServiceForBooking.session}
+          onProceedToCheckout={handleServiceBookingSubmit}
         />
       )}
       {/* Booking Modal for Crystals */}

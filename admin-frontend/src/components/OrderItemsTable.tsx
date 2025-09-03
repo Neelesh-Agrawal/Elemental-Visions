@@ -33,7 +33,8 @@ interface FlattenedOrderItem extends OrderItem {
   shippingStatus: 'processing' | 'shipped' | 'delivered';
 }
 
-const API_BASE_URL = 'http://localhost:8000'; // Update this to match your FastAPI server URL
+
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
 const OrderItemsTable: React.FC = () => {
   const [orderItems, setOrderItems] = useState<FlattenedOrderItem[]>([]);
@@ -61,6 +62,7 @@ const OrderItemsTable: React.FC = () => {
         order.items.forEach(item => {
           flattenedItems.push({
             ...item,
+            order_id: order.id, // Explicitly set the order ID
             customer_name: order.customer_name,
             email: order.email,
             phone: order.phone,
@@ -123,37 +125,40 @@ const OrderItemsTable: React.FC = () => {
       const newOrderStatus = mapShippingStatusToOrderStatus(newShippingStatus);
       
       let endpoint = '';
-      let method = 'PATCH';
-      let body = undefined;
 
       switch (newOrderStatus) {
         case 'processing':
-          // If you don't have a processing endpoint, use the general status update
-          endpoint = `${API_BASE_URL}/orders/${item.order_id}/ship`;
-          body = JSON.stringify({ status: 'processing' });
+          endpoint = `${API_BASE_URL}/orders/${item.order_id}/processing`;
           break;
         case 'shipped':
-          endpoint = `${API_BASE_URL}/orders/${item.order_id}/ship`;
-          body = JSON.stringify({ status: 'shipped' });
+          endpoint = `${API_BASE_URL}/orders/${item.order_id}/ship?status=shipped`;
           break;
         case 'delivered':
-          endpoint = `${API_BASE_URL}/orders/${item.order_id}/ship`;
-          body = JSON.stringify({ status: 'delivered' });
+          endpoint = `${API_BASE_URL}/orders/${item.order_id}/ship?status=delivered`;
           break;
         default:
           throw new Error('Invalid shipping status');
       }
 
+      console.log('🚚 Updating shipping status:', {
+        orderId: item.order_id,
+        itemId: item.id,
+        newStatus: newShippingStatus,
+        newOrderStatus: newOrderStatus,
+        endpoint: endpoint
+      });
+
       const response = await fetch(endpoint, {
-        method,
+        method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
         },
-        body,
       });
 
       if (!response.ok) {
-        throw new Error('Failed to update shipping status');
+        const errorText = await response.text().catch(() => 'Unknown error');
+        console.error('API Error Response:', response.status, errorText);
+        throw new Error(`Failed to update shipping status: ${response.status} - ${errorText}`);
       }
 
       // Update local state
@@ -165,7 +170,11 @@ const OrderItemsTable: React.FC = () => {
         )
       );
 
-      setStatusSelections(prev => ({ ...prev, [itemKey]: undefined }));
+      setStatusSelections(prev => {
+        const newSelections = { ...prev };
+        delete newSelections[itemKey];
+        return newSelections;
+      });
       
       console.log(`Shipping status updated to ${newShippingStatus} for item ${item.id} in order ${item.order_id} - User will be notified`);
     } catch (err) {

@@ -3,7 +3,9 @@ import Navbar from '../components/Navbar';
 import { Footer } from '../components/Footer';
 import Cart from '../components/Cart';
 import CheckoutForm from '../components/CheckoutForm';
-import BookingModal from '../components/BookingModal';
+
+import ServiceBookingModal from '../components/ServiceBookingModal';
+import ServiceBookingForm, { ServiceBookingData } from '../components/ServiceBookingForm';
 import { ChevronRight, Star, Eye, Sparkles, Heart, Gem } from 'lucide-react';
 import { CartItem, ServiceSession } from '../types';
 import { useNavigate } from 'react-router-dom';
@@ -53,8 +55,15 @@ const Services: React.FC = () => {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
-  const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
+
+  const [isServiceBookingModalOpen, setIsServiceBookingModalOpen] = useState(false);
+  const [isServiceBookingFormOpen, setIsServiceBookingFormOpen] = useState(false);
   const [selectedService, setSelectedService] = useState({ type: '', name: '' });
+  const [selectedServiceForBooking, setSelectedServiceForBooking] = useState<{
+    serviceType: string;
+    serviceName: string;
+    session: ServiceSession;
+  } | null>(null);
   const navigate = useNavigate();
 
   // Debug: Log cart changes
@@ -63,108 +72,116 @@ const Services: React.FC = () => {
     console.log('🛒 Cart length:', cart.length);
   }, [cart]);
 
-  // Debug: Monitor function when modal state changes
+  // Debug: Monitor service booking modal state changes
   useEffect(() => {
-    if (isBookingModalOpen) {
-      console.log('🚨 Modal opened - checking handleAddToCart:');
-      console.log('🚨 Function exists:', !!handleAddToCart);
-      console.log('🚨 Function type:', typeof handleAddToCart);
-      console.log('🚨 Function reference:', handleAddToCart);
-      console.log('🚨 Selected service:', selectedService);
+    if (isServiceBookingModalOpen) {
+      console.log('🚨 Service booking modal opened:', {
+        serviceType: selectedService.type,
+        serviceName: selectedService.name
+      });
     }
-  }, [isBookingModalOpen, handleAddToCart, selectedService]);
+  }, [isServiceBookingModalOpen, selectedService]);
 
   const handleBookService = (type: string, title: string) => {
-    console.log('📋 Opening booking modal for:', { type, title });
-    console.log('📋 handleAddToCart function before setting modal:', typeof handleAddToCart, handleAddToCart);
+    console.log('📋 Opening service booking modal for:', { type, title });
     setSelectedService({ type, name: title });
-    setIsBookingModalOpen(true);
+    setIsServiceBookingModalOpen(true);
   };
 
-  // Define handleAddToCart function as a regular function first
-  const handleAddToCartInternal = (serviceType: string, serviceName: string, session: ServiceSession) => {
-    console.log('🔍 handleAddToCart called with:', { serviceType, serviceName, session });
+  // Handle service booking (Book Now)
+  const handleServiceBookNow = (serviceType: string, serviceName: string, session: ServiceSession) => {
+    console.log('📅 Service book now called with:', { serviceType, serviceName, session });
     
-    if (!serviceType || !serviceName || !session) {
-      console.error('❌ Missing required parameters:', { serviceType, serviceName, session });
-      alert('Invalid service data. Please try again.');
-      return;
-    }
+    setSelectedServiceForBooking({
+      serviceType,
+      serviceName,
+      session
+    });
+    
+    setIsServiceBookingModalOpen(false);
+    setIsServiceBookingFormOpen(true);
+  };
+
+  // Handle service booking form submission
+  const handleServiceBookingSubmit = async (bookingData: ServiceBookingData) => {
+    console.log('📦 Service booking submission:', bookingData);
     
     try {
-      // Convert price to number
-      const price = typeof session.price === 'string' ? 
-        parseInt(session.price.replace(/[^\d]/g, '')) : 
-        Number(session.price);
-      
-      if (isNaN(price) || price <= 0) {
-        console.error('❌ Invalid price:', session.price);
-        alert('Invalid price. Please try again.');
-        return;
-      }
-      
-      console.log('💰 Processed price:', price);
-
-      const newItem: CartItem = {
-        crystal: {
-          id: `service-${serviceType}-${session.id}`,
-          name: serviceName,
-          image: '/api/placeholder/300/200',
-          purpose: session.name,
-          description: session.description
-        },
-        form: {
-          name: session.duration || 'Standard',
-          price: price
-        },
+      // Prepare service booking data for backend
+      const orderData = {
+        service_name: bookingData.serviceName,
+        session_name: bookingData.selectedSession.name,
         quantity: 1,
-        type: 'service'
+        unit_price: bookingData.total_amount
       };
 
-      console.log('🆕 New item created:', newItem);
-
-      setCart(prevCart => {
-        console.log('📦 Previous cart:', prevCart);
-        
-        const existingItemIndex = prevCart.findIndex(
-          item => item.crystal.id === newItem.crystal.id && item.form.name === newItem.form.name
-        );
-
-        console.log('🔍 Existing item index:', existingItemIndex);
-
-        let updatedCart;
-        if (existingItemIndex > -1) {
-          updatedCart = prevCart.map((item, index) =>
-            index === existingItemIndex
-              ? { ...item, quantity: item.quantity + 1 }
-              : item
-          );
-          console.log('➕ Updated existing item in cart:', updatedCart);
-        } else {
-          updatedCart = [...prevCart, newItem];
-          console.log('🆕 Added new item to cart:', updatedCart);
-        }
-        
-        return updatedCart;
+      console.log('📦 Preparing service booking:', {
+        customer: {
+          customer_name: bookingData.customer_name,
+          email: bookingData.email,
+          phone: bookingData.phone
+        },
+        items: [orderData],
+        total: bookingData.total_amount
       });
 
-      // Close modal and show success
-      setIsBookingModalOpen(false);
-      console.log('✅ Item should be added to cart');
+      // Call API endpoint for service bookings
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+      const response = await fetch(`${apiUrl}/service-bookings/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          customer_name: bookingData.customer_name,
+          email: bookingData.email,
+          phone: bookingData.phone,
+          items: [orderData],
+          total_amount: bookingData.total_amount,
+          status: 'pending'
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || 'Failed to place service booking.');
+      }
+
+      const data = await response.json();
+      console.log('✅ Service booking created:', data);
+
+      // Close form and redirect to payment
+      setIsServiceBookingFormOpen(false);
       
-      // Show success message
-      setTimeout(() => {
-        alert(`✅ ${serviceName} - ${session.name} added to cart!`);
-      }, 100);
+      // Navigate to payment with service booking data
+      navigate('/payment', { 
+        state: { 
+          bookingData: {
+            customer: {
+              customer_name: bookingData.customer_name,
+              email: bookingData.email,
+              phone: bookingData.phone
+            },
+            service: {
+              name: bookingData.serviceName,
+              session: bookingData.selectedSession.name,
+              duration: bookingData.selectedSession.duration,
+              price: bookingData.total_amount
+            },
+            total: bookingData.total_amount,
+            booking_id: data.id || 'temp-' + Date.now()
+          },
+          isService: true
+        } 
+      });
       
     } catch (error) {
-      console.error('❌ Error adding to cart:', error);
-      alert('Error adding item to cart. Please try again.');
+      console.error('❌ Service booking error:', error);
+      alert(`Error placing service booking: ${error.message}. Please try again.`);
     }
   };
 
-  // Now memoize it with useCallback
-  const handleAddToCart = useCallback(handleAddToCartInternal, [setCart, setIsBookingModalOpen]);
+
 
   const updateCartQuantity = (compositeId: string, quantity: number) => {
     console.log('🔢 Updating cart quantity:', { compositeId, quantity });
@@ -222,15 +239,9 @@ const Services: React.FC = () => {
     navigate('/payment', { state: { items: cart, total: getTotalPrice() } });
   };
 
-  const handleCloseBookingModal = () => {
-    console.log('📋 Closing booking modal');
-    setIsBookingModalOpen(false);
-  };
 
-  // Debug: Log the function reference when component renders
-  console.log('🔧 Services component render - handleAddToCart function:', handleAddToCart);
-  console.log('🔧 Services component render - typeof handleAddToCart:', typeof handleAddToCart);
-  console.log('🔧 Services component render - function exists:', !!handleAddToCart);
+
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-900 via-indigo-900 to-black text-white overflow-x-hidden">
@@ -264,45 +275,37 @@ const Services: React.FC = () => {
         onOrderComplete={handleOrderComplete}
       />
 
-      {/* BookingModal with explicit validation before rendering */}
-      {isBookingModalOpen && handleAddToCart && (
-        <BookingModal
-          key={`${selectedService.type}-${selectedService.name}-${isBookingModalOpen}`}
-          isOpen={isBookingModalOpen}
-          onClose={handleCloseBookingModal}
+      {/* Service Booking Modal - New booking flow */}
+      {isServiceBookingModalOpen && (
+        <ServiceBookingModal
+          key={`${selectedService.type}-${selectedService.name}-${isServiceBookingModalOpen}`}
+          isOpen={isServiceBookingModalOpen}
+          onClose={() => setIsServiceBookingModalOpen(false)}
           serviceType={selectedService.type}
           serviceName={selectedService.name}
-          onAddToCart={handleAddToCart}
+          onBookNow={handleServiceBookNow}
         />
       )}
 
-      {/* Show error if function is missing */}
-      {isBookingModalOpen && !handleAddToCart && (
-        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
-          <div className="bg-red-900/90 rounded-2xl p-6 max-w-lg w-full border border-red-500/50">
-            <h3 className="text-2xl font-bold text-white mb-4">⚠️ Function Error</h3>
-            <p className="text-red-200 mb-4">
-              The add to cart function is not available. This is a development issue.
-            </p>
-            <button
-              onClick={() => setIsBookingModalOpen(false)}
-              className="w-full bg-red-600 hover:bg-red-700 py-2 px-4 rounded font-bold"
-            >
-              Close
-            </button>
-          </div>
-        </div>
+      {/* Service Booking Form */}
+      {isServiceBookingFormOpen && selectedServiceForBooking && (
+        <ServiceBookingForm
+          isOpen={isServiceBookingFormOpen}
+          onClose={() => setIsServiceBookingFormOpen(false)}
+          serviceType={selectedServiceForBooking.serviceType}
+          serviceName={selectedServiceForBooking.serviceName}
+          selectedSession={selectedServiceForBooking.session}
+          onProceedToCheckout={handleServiceBookingSubmit}
+        />
       )}
 
       {/* Debug info for troubleshooting */}
-      <div className="fixed top-32 right-4 bg-red-900/80 text-white p-2 rounded text-xs z-40 max-w-xs">
-        <div>Modal Open: {isBookingModalOpen.toString()}</div>
+      <div className="fixed top-32 right-4 bg-green-900/80 text-white p-2 rounded text-xs z-40 max-w-xs">
+        <div>Service Modal: {isServiceBookingModalOpen.toString()}</div>
+        <div>Booking Form: {isServiceBookingFormOpen.toString()}</div>
         <div>Service Type: {selectedService.type}</div>
         <div>Service Name: {selectedService.name}</div>
-        <div>Handler Type: {typeof handleAddToCart}</div>
-        <div>Handler Exists: {handleAddToCart ? 'YES' : 'NO'}</div>
-        <div>Function Name: {handleAddToCart?.name || 'Anonymous'}</div>
-        <div>Function Valid: {typeof handleAddToCart === 'function' ? 'YES' : 'NO'}</div>
+        <div>Selected for Booking: {selectedServiceForBooking ? 'YES' : 'NO'}</div>
       </div>
 
       <section id="services" className="py-20 px-4" data-aos="fade-up">
