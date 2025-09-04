@@ -16,7 +16,7 @@ export const Footer: React.FC = () => (
         ✨ Where Ancient Wisdom Meets Modern Insight ✨
       </p>
       <p className="text-sm text-purple-300">
-        © 2024 Elemental Visions. All rights reserved. | Crafted with ✨ and ancient wisdom
+        © 2025 Elemental Visions. All rights reserved. | Crafted with ✨ and ancient wisdom
       </p>
     </div>
   </footer>

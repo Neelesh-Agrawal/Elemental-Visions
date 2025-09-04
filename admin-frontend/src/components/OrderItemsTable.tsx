@@ -33,8 +33,7 @@ interface FlattenedOrderItem extends OrderItem {
   shippingStatus: 'processing' | 'shipped' | 'delivered';
 }
 
-
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+const API_BASE_URL = import.meta.env.VITE_API_URL ;
 
 const OrderItemsTable: React.FC = () => {
   const [orderItems, setOrderItems] = useState<FlattenedOrderItem[]>([]);

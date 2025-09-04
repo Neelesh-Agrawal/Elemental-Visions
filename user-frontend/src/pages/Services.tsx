@@ -46,6 +46,7 @@ const services = [
     icon: <Gem className="w-8 h-8" />,
     title: "Crystal Healing",
     description: "In a Crystal Healing Session, I use intuitively selected crystals to cleanse, balance, and activate your energy centers (chakras).\nThis gentle yet transformative modality helps you:\n\n🔮 Release emotional blocks\n💖 Heal past traumas\n🧘‍♀️ Regain energetic balance\n🌈 Strengthen aura and spiritual connection\n🌿 Feel lighter, clearer, and more aligned",
+    basePrice: "From ₹299",
     duration: "Varies",
     type: 'crystal'
   }
@@ -308,7 +309,7 @@ const Services: React.FC = () => {
         <div>Selected for Booking: {selectedServiceForBooking ? 'YES' : 'NO'}</div>
       </div>
 
-      <section id="services" className="py-20 px-4" data-aos="fade-up">
+      <section id="services" className="py-20 px-6 sm:px-4" data-aos="fade-up">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-teal-400 to-purple-400 bg-clip-text text-transparent font-unbounded drop-shadow-lg">
@@ -318,11 +319,11 @@ const Services: React.FC = () => {
               Each service is crafted to guide you toward clarity, healing, and transformation
             </p>
           </div>
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
             {services.map((service, index) => (
               <div 
                 key={index}
-                className="bg-gradient-to-br from-purple-800/50 to-indigo-800/50 glass card-shadow p-8 border border-purple-500/30 hover:border-yellow-400/50 transition-all duration-300 transform hover:scale-105 hover:shadow-2xl group flex flex-col justify-between"
+                className="bg-gradient-to-br from-purple-800/50 to-indigo-800/50 glass card-shadow p-6 sm:p-8 border border-purple-500/30 hover:border-yellow-400/50 transition-all duration-300 transform hover:scale-105 hover:shadow-2xl group flex flex-col justify-between"
                 data-aos="zoom-in"
               >
                 <div className="text-yellow-400 mb-4 group-hover:scale-110 transition-transform duration-300">

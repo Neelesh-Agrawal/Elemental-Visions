@@ -59,7 +59,6 @@ const serviceData: Record<string, any> = {
       {
         id: "karma-basic",
         name: "Karma Analysis Session",
-        duration: "30 mins",
         price: 999,
         description: "In-depth analysis of karmic patterns and soul lessons."
       }
@@ -90,18 +89,17 @@ const serviceData: Record<string, any> = {
     description: "Personalized crystal healing session with energy alignment, chakra balancing, and intention setting.",
     sessions: [
       {
+        id: "crystal-consultancy",
+        name: "Crystal Consultancy",
+        price: 299,
+        description: "We will guide you on what crystal you should wear"
+      },
+      {
         id: "crystal-basic",
         name: "Basic Crystal Healing",
         duration: "20 mins",
         price: 800,
         description: "A gentle session for energy cleansing and balance."
-      },
-      {
-        id: "crystal-advanced",
-        name: "Advanced Crystal Healing",
-        duration: "40 mins",
-        price: 1500,
-        description: "Deep healing with advanced crystal layouts and chakra work."
       }
     ]
   }
@@ -269,9 +267,11 @@ const BookingModal: React.FC<BookingModalProps> = ({
                 <div className="text-purple-200 text-base mb-2">
                   {session.description}
                 </div>
-                <div className="text-purple-300 text-sm">
-                  Duration: {session.duration}
-                </div>
+                {session.duration && (
+                  <div className="text-purple-300 text-sm">
+                    Duration: {session.duration}
+                  </div>
+                )}
               </div>
             ))}
           </div>

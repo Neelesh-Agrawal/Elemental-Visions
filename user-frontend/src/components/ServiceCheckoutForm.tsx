@@ -154,7 +154,9 @@ const ServiceCheckoutForm: React.FC<ServiceCheckoutFormProps> = ({
                     <div className="text-yellow-400 text-sm">{item.crystal.purpose}</div>
                     <div className="text-purple-300 text-xs">{item.form.name}</div>
                   </div>
-                  <div className="text-yellow-300 font-bold text-lg ml-4">₹{item.form.price}</div>
+                  <div className="text-yellow-300 font-bold text-lg ml-4">
+                    ₹{item.form.price}{item.form.name === 'Raw' ? ' onwards' : ''}
+                  </div>
                 </li>
               ))}
             </ul>

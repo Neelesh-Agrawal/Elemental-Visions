@@ -87,9 +87,11 @@ const Crystals: React.FC = () => {
                         </span>
                       ))}
                     </div>
-                    <div className="text-xs text-purple-200">
-                      Available as: {crystal.forms.map(f => f.name).join(' | ')}
-                    </div>
+                    {crystal.name !== 'Mixels' && (
+                      <div className="text-xs text-purple-200">
+                        Available as: {crystal.forms.map(f => f.name).join(' | ')}
+                      </div>
+                    )}
                     <button
                       onClick={() => {
                         setSelectedCrystal(crystal);

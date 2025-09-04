@@ -23,7 +23,7 @@ interface ServiceBooking {
 }
 
 const FEEDBACK_FORM_LINK = 'https://forms.gle/your-feedback-form-link';
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+const API_BASE_URL = import.meta.env.VITE_API_URL ;
 
 const ServiceBookingsTable: React.FC = () => {
   const [bookings, setBookings] = useState<ServiceBooking[]>([]);

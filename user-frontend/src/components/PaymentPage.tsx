@@ -86,7 +86,7 @@ const PaymentPage: React.FC<PaymentPageProps> = ({
         {
           type: 'UPI',
           parameters: {
-            payeeVpa: 'elementalvisions@upi',
+            payeeVpa: 'elementalvisions.in@okhdfcbank',
             payeeName: 'Elemental Visions',
           },
         },
@@ -151,7 +151,7 @@ const PaymentPage: React.FC<PaymentPageProps> = ({
 
   // Alternative UPI payment handler for direct UPI apps
   const handleUPIPayment = () => {
-    const upiUrl = `upi://pay?pa=elementalvisions@upi&pn=Elemental Visions&am=${finalTotal}&cu=INR&tn=Order Payment`;
+    const upiUrl = `upi://pay?pa=elementalvisions.in@okhdfcbank&pn=Elemental Visions&am=${finalTotal}&cu=INR&tn=Order Payment`;
     // Try to open UPI app
     const link = document.createElement('a');
     link.href = upiUrl;
@@ -223,7 +223,7 @@ const PaymentPage: React.FC<PaymentPageProps> = ({
               <div className="p-3 bg-gradient-to-br from-yellow-400/30 to-orange-400/10 shadow-xl border-4 border-yellow-400/40 rounded-2xl flex justify-center items-center"
                 style={{ width: 'max-content', minWidth: '240px', minHeight: '240px' }}>
                 <img
-                  src={`https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=upi://pay?pa=elementalvisions@upi&pn=Elemental Visions&am=${finalTotal}&cu=INR&tn=Order Payment`}
+                  src={`https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=upi://pay?pa=elementalvisions.in@okhdfcbank&pn=Elemental Visions&am=${finalTotal}&cu=INR&tn=Order Payment`}
                   alt="UPI QR Code"
                   className="w-56 h-56 rounded-xl shadow-2xl border-4 border-yellow-400/80"
                 />
@@ -231,10 +231,10 @@ const PaymentPage: React.FC<PaymentPageProps> = ({
             </div>
             <div className="text-2xl text-white font-extrabold mb-1 tracking-wide">Scan & Pay</div>
             <div className="flex items-center justify-center mb-1">
-              <span className="text-yellow-400 font-mono text-lg md:text-xl mr-2 select-all">elementalvisions@upi</span>
+              <span className="text-yellow-400 font-mono text-lg md:text-xl mr-2 select-all">elementalvisions.in@okhdfcbank</span>
               <button
                 onClick={() => {
-                  navigator.clipboard.writeText('elementalvisions@upi');
+                  navigator.clipboard.writeText('elementalvisions.in@okhdfcbank');
                 }}
                 className="bg-yellow-400 text-black px-2 py-1 rounded font-bold text-xs hover:bg-yellow-300 transition"
                 title="Copy UPI ID"
@@ -304,7 +304,9 @@ const PaymentPage: React.FC<PaymentPageProps> = ({
                       <span className="text-xs text-yellow-400 ml-2">({item.form.name})</span>
                       <span className="text-xs text-purple-300 ml-2">x {item.quantity}</span>
                     </div>
-                    <div className="text-yellow-300 font-bold text-lg">₹{item.form.price * item.quantity}</div>
+                    <div className="text-yellow-300 font-bold text-lg">
+                      ₹{item.form.price * item.quantity}{item.form.name === 'Raw' ? ' onwards' : ''}
+                    </div>
                   </li>
                 ))
               )}

@@ -109,6 +109,7 @@ const services = [
     icon: <Gem className="w-8 h-8" />,
     title: "Crystal Healing",
     description: `In  a Crystal Healing Session, I use intuitively selected crystals to cleanse, balance, and activate your energy centers (chakras).\nThis gentle yet transformative modality helps you:\n\n🔮 Release emotional blocks\n💖 Heal past traumas\n🧘‍♀️ Regain energetic balance\n🌈 Strengthen aura and spiritual connection\n🌿 Feel lighter, clearer, and more aligned`,
+    basePrice: "From ₹299",
     duration: "Varies",
     type: 'crystal'
   }
@@ -174,8 +175,10 @@ const CrystalFormModal: React.FC<{
             {crystal.forms.map(form => (
               <div key={form.name} className="bg-black/30 rounded-xl p-4 flex flex-col items-center border-2 border-yellow-400/30">
                 <img src={form.image} alt={form.name} className="w-20 h-20 object-cover rounded-lg mb-2 border-2 border-yellow-400/40" />
-                <div className="text-lg font-extrabold text-yellow-400 font-unbounded uppercase mb-1">{form.name}</div>
-                <div className="text-base font-bold text-yellow-400 mb-1">₹{form.price}</div>
+                <div className="text-sm font-extrabold text-yellow-400 font-unbounded uppercase mb-1 text-center leading-none">{form.name}</div>
+                <div className="text-base font-bold text-yellow-400 mb-1">
+                  ₹{form.price}{form.name === 'Raw' ? ' onwards' : ''}
+                </div>
                 <div className="flex items-center gap-2 mt-2">
                   <button onClick={() => setQuantities(q => ({ ...q, [form.name]: Math.max(0, (q[form.name] || 0) - 1) }))} className="w-8 h-8 rounded-full bg-yellow-400 text-black font-bold text-xl flex items-center justify-center">-</button>
                   <span className="text-xl font-bold text-white w-6 text-center">{quantities[form.name] || 0}</span>
@@ -402,14 +405,54 @@ const Home: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-center">
             <div>
               <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-yellow-400 to-orange-400 bg-clip-text text-transparent font-unbounded drop-shadow-lg">
-                Meet Sakshi
+                Guiding you with Tarot, Intuition & Vision
               </h2>
               <p className="text-base sm:text-lg text-gray-300 mb-6 leading-relaxed">
-                With over 10 years in the spiritual arts, I blend intuition with practical wisdom to guide souls toward their highest potential. My journey began with a profound spiritual awakening that led me to study ancient divination arts and modern coaching techniques.
+                At Elemental Visions, I weave a sacred space where seekers come home to their inner truth.
+                Through Tarot, Palmistry, Crystals, and Intuitive whispers, I listen to the language of the universe—
+                a language written in symbols, synchronicities, and the dance of the elements.
               </p>
               <p className="text-base sm:text-lg text-gray-300 mb-6 leading-relaxed">
-                My philosophy is simple: Karma isn't fate—it's actionable energy. Through personalized readings and coaching, I help you transform obstacles into opportunities and confusion into clarity.
+                If your heart longs for clarity in love, career, or destiny,
+                if you are drawn to the healing light of crystals,
+                if your soul seeks to remember its deepest essence—
+                I am here to walk beside you, with compassion, intuition, and sacred vision.
               </p>
+              <p className="text-base sm:text-lg text-gray-300 mb-8 leading-relaxed font-medium text-center italic">
+                Step into the mystery. The cards await. The vision unfolds.
+              </p>
+              
+              <div className="mb-8">
+                <h3 className="text-2xl font-bold mb-4 bg-gradient-to-r from-teal-400 to-purple-400 bg-clip-text text-transparent">
+                  What Awaits You Here:
+                </h3>
+                <div className="space-y-3 text-gray-300">
+                  <div className="flex items-start space-x-3">
+                    <span className="text-yellow-400 font-bold">✨</span>
+                    <div>
+                      <span className="font-semibold text-yellow-400">Tarot Readings:</span> Whispers of guidance woven through the cards, illuminating the path ahead.
+                    </div>
+                  </div>
+                  <div className="flex items-start space-x-3">
+                    <span className="text-yellow-400 font-bold">🖐️</span>
+                    <div>
+                      <span className="font-semibold text-yellow-400">Palmistry:</span> The ancient story etched in your hands, revealing the wisdom you already carry.
+                    </div>
+                  </div>
+                  <div className="flex items-start space-x-3">
+                    <span className="text-yellow-400 font-bold">💎</span>
+                    <div>
+                      <span className="font-semibold text-yellow-400">Crystal Guidance:</span> Sacred stones attuned to heal, align, and awaken your energy.
+                    </div>
+                  </div>
+                  <div className="flex items-start space-x-3">
+                    <span className="text-yellow-400 font-bold">📚</span>
+                    <div>
+                      <span className="font-semibold text-yellow-400">Courses & Resources:</span> A doorway to learn, explore, and journey deeper into the mysteries of Tarot.
+                    </div>
+                  </div>
+                </div>
+              </div>
               <div className="grid grid-cols-2 gap-4 mb-8">
                 <div className="text-center p-4 bg-purple-800/30 rounded-lg">
                   <div className="text-2xl font-bold text-yellow-400">1000+</div>
@@ -481,7 +524,7 @@ const Home: React.FC = () => {
             </button>
             <div
               id="crystals-container"
-              className="flex space-x-6 overflow-x-auto scrollbar-hide pb-4 px-2 sm:px-12 relative"
+              className="flex space-x-6 overflow-x-auto scrollbar-hide pb-4 px-6 sm:px-12 relative"
               style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
             >
               {crystals.map((crystal, idx) => (
@@ -494,6 +537,7 @@ const Home: React.FC = () => {
                   properties={crystal.properties}
                   forms={crystal.forms.map(f => f.name)}
                   onSelect={() => handleBookCrystal(crystal)}
+                  isMixels={crystal.name === 'Mixels'}
                 />
               ))}
             </div>
@@ -542,8 +586,6 @@ const Home: React.FC = () => {
                 <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-4 space-y-2 sm:space-y-0">
                   <Phone className="w-6 h-6 text-yellow-400" />
                   <span className="text-gray-300">+91 9176133139</span>
-                  <Phone className="w-6 h-6 text-yellow-400" />
-                  <span className="text-gray-300">+91 9884084043</span>
                 </div>
                 <div className="flex items-center space-x-4">
                   <Mail className="w-6 h-6 text-yellow-400" />
@@ -557,7 +599,9 @@ const Home: React.FC = () => {
               <div className="mt-8">
                 <h4 className="text-lg font-semibold mb-4 text-white">Follow the Journey</h4>
                 <div className="flex space-x-4">
-                  <Instagram className="w-6 h-6 text-purple-400 hover:text-yellow-400 cursor-pointer transition-colors" />
+                  <a href="https://www.instagram.com/elemental.visions/" target="_blank" rel="noopener noreferrer">
+                    <Instagram className="w-6 h-6 text-purple-400 hover:text-yellow-400 cursor-pointer transition-colors" />
+                  </a>
                   <Facebook className="w-6 h-6 text-purple-400 hover:text-yellow-400 cursor-pointer transition-colors" />
                   <Twitter className="w-6 h-6 text-purple-400 hover:text-yellow-400 cursor-pointer transition-colors" />
                 </div>
@@ -600,7 +644,7 @@ const Home: React.FC = () => {
                 <button 
                   type="button"
                   onClick={() => {
-                    const whatsappUrl = `https://wa.me/919876543210?text=${encodeURIComponent('Hi! I would like to book a session. Please let me know available time slots.')}`;
+                    const whatsappUrl = `https://wa.me/919176133139?text=${encodeURIComponent('Hi! I would like to book a session. Please let me know available time slots.')}`;
                     window.open(whatsappUrl, '_blank');
                   }}
                   className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 py-3 rounded-lg font-semibold transition-all duration-300 transform hover:scale-105"

@@ -204,7 +204,9 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({
 			<span className="text-xs text-yellow-400 ml-2">({item.form.name})</span>
 			<span className="text-xs text-purple-300 ml-2">x {item.quantity}</span>
 			</div>
-			<div className="text-yellow-300 font-bold">₹{item.form.price * item.quantity}</div>
+			<div className="text-yellow-300 font-bold">
+				₹{item.form.price * item.quantity}{item.form.name === 'Raw' ? ' onwards' : ''}
+			</div>
 			</li>
 		))}
 		</ul>

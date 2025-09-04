@@ -18,7 +18,7 @@ const ServiceCard: React.FC<ServiceCardProps> = ({
   duration,
   onBook,
 }) => (
-  <div className="bg-gradient-to-br from-purple-800/50 to-indigo-800/50 glass card-shadow p-8 border border-purple-500/30 hover:border-yellow-400/50 transition-all duration-300 transform hover:scale-105 hover:shadow-2xl group flex flex-col justify-between">
+  <div className="bg-gradient-to-br from-purple-800/50 to-indigo-800/50 glass card-shadow p-6 sm:p-8 border border-purple-500/30 hover:border-yellow-400/50 transition-all duration-300 transform hover:scale-105 hover:shadow-2xl group flex flex-col justify-between">
     <div className="text-yellow-400 mb-4 group-hover:scale-110 transition-transform duration-300">
       {icon}
     </div>

@@ -53,7 +53,9 @@ const Cart: React.FC<CartProps> = ({
                       <h4 className="text-white font-bold text-lg">{item.crystal.name}</h4>
                       <span className="text-xs text-yellow-400 font-semibold tracking-wide block">Form: {item.form.name}</span>
                       <p className="text-purple-300 text-sm mt-1">{item.crystal.purpose}</p>
-                      <span className="text-yellow-400 font-semibold text-base block mt-1">Price: ₹{item.form.price}</span>
+                      <span className="text-yellow-400 font-semibold text-base block mt-1">
+                        Price: ₹{item.form.price}{item.form.name === 'Raw' ? ' onwards' : ''}
+                      </span>
                       <span className="text-green-300 font-semibold text-base block mt-1">Subtotal: ₹{item.form.price * item.quantity}</span>
                     </div>
                     <div className="flex items-center justify-between mt-2">
