@@ -33,9 +33,9 @@ const CrystalCard: React.FC<CrystalCardProps> = ({
         <p className="text-yellow-300 font-semibold text-base mb-1 drop-shadow">{purpose}</p>
       </div>
     </div>
-    <div className="p-5 flex flex-col gap-2 flex-1 min-h-0 justify-between overflow-hidden">
-      <p className="text-gray-300 text-sm line-clamp-3 mb-2">{description}</p>
-      <div className="flex flex-wrap gap-1 mb-2">
+    <div className={`${isMixels ? 'p-4' : 'p-5'} flex flex-col gap-2 flex-1 min-h-0 justify-between overflow-hidden`}>
+      <p className={`text-gray-300 ${isMixels ? 'text-sm line-clamp-2' : 'text-sm line-clamp-3'} ${isMixels ? 'mb-1' : 'mb-2'}`}>{description}</p>
+      <div className={`flex flex-wrap gap-1 ${isMixels ? 'mb-1' : 'mb-2'}`}>
         {properties.map((property, index) => (
           <span
             key={index}
@@ -49,6 +49,14 @@ const CrystalCard: React.FC<CrystalCardProps> = ({
         <div className="text-xs text-purple-200 mb-3 leading-relaxed break-words">
           <span className="font-medium">Available as:</span><br />
           <span className="text-yellow-300">{forms.join(' • ')}</span>
+        </div>
+      )}
+      {isMixels && (
+        <div className="bg-gradient-to-r from-yellow-400/20 to-orange-400/20 border border-yellow-400/40 rounded-lg p-2 mb-1 animate-pulse">
+          <div className="text-center">
+            <div className="text-yellow-300 font-bold text-xs leading-tight">✨ CUSTOM DESIGNS AVAILABLE ✨</div>
+            <div className="text-xs text-yellow-200 leading-tight">Tell us your requirements!</div>
+          </div>
         </div>
       )}
       <button

@@ -459,7 +459,7 @@ const Home: React.FC = () => {
                   <div className="text-sm text-purple-300">Readings Given</div>
                 </div>
                 <div className="text-center p-4 bg-purple-800/30 rounded-lg">
-                  <div className="text-2xl font-bold text-yellow-400">10+</div>
+                  <div className="text-2xl font-bold text-yellow-400">5+</div>
                   <div className="text-sm text-purple-300">Years Experience</div>
                 </div>
               </div>
@@ -503,9 +503,14 @@ const Home: React.FC = () => {
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-teal-400 to-purple-400 bg-clip-text text-transparent font-unbounded drop-shadow-lg">
               Healing Crystals
             </h2>
-            <p className="text-base sm:text-xl text-gray-300 max-w-3xl mx-auto">
+            <p className="text-base sm:text-xl text-gray-300 max-w-3xl mx-auto mb-4">
               Ethically sourced crystals charged with intention to amplify your spiritual journey
             </p>
+            <div className="bg-yellow-400/20 border border-yellow-400/40 rounded-lg p-3 max-w-2xl mx-auto">
+              <p className="text-sm text-yellow-300 font-medium">
+                ⚠️ Images are for reference only. Actual products may vary due to their natural nature.
+              </p>
+            </div>
           </div>
           <div className="relative">
             <button

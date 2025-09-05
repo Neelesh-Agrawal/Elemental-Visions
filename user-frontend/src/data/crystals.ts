@@ -50,7 +50,7 @@ export const crystals: Crystal[] = [
   },
   {
     id: '4',
-    name: 'Black Turmoline',
+    name: 'Black Tourmaline',
     purpose: 'Grounding',
     price: 625,
     image: '/crystals/Black_Tourmaline/outer.jpg',
@@ -307,14 +307,14 @@ export const crystals: Crystal[] = [
     purpose: 'Crystal Combinations',
     price: 500,
     image: '/crystals/Mixels/7_chakra_bracelet.jpeg',
-    description: 'Beautiful combination bracelets with multiple crystals for enhanced energy and healing. ✨ **Customization available according to your requirements** ✨',
+    description: 'Beautiful combination bracelets with multiple crystals for enhanced energy and healing.',
     properties: ['Combination', 'Enhanced Energy', 'Multi-Purpose', 'Healing'],
     category: 'Mixels',
     forms: [
       { name: '7 Chakras (all combos)', price: 500, image: '/crystals/Mixels/7_chakra_bracelet.jpeg' },
       { name: 'Money Magnet (Citrine + Green Aventurine + Pyrite + Tiger Eye)', price: 750, image: '/crystals/Mixels/money_magnet.jpeg' },
       { name: 'Triple Protection (Tiger Eye + Black Obsedian + Haemetite)', price: 500, image: '/crystals/Mixels/c.jpeg' },
-      { name: 'Wall Hangings (Negativity Protection)', price: 450, image: '/crystals/Wall_Hangings/protection.jpeg' },
+      { name: 'Wall Hangings (Negativity Protection)', price: 450, image: '/crystals/Wall_Hangings/1.jpg' },
       { name: 'Evil Eye Hangings', price: 300, image: '/crystals/Wall_Hangings/evil_eye.jpeg' }
     ]
   }
