@@ -294,32 +294,6 @@ const Home: React.FC = () => {
           </div>
         </div>
       </section>
-      {/* Services Section */}
-      <section id="services" className="py-16 px-2 sm:px-4" data-aos="fade-up">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-12 sm:mb-16">
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-teal-400 to-purple-400 bg-clip-text text-transparent font-unbounded drop-shadow-lg">
-              Sacred Services
-            </h2>
-            <p className="text-base sm:text-xl text-gray-300 max-w-3xl mx-auto">
-              Each service is crafted to guide you toward clarity, healing, and transformation
-            </p>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-            {services.map((service, index) => (
-              <ServiceCard
-                key={index}
-                icon={service.icon}
-                title={service.title}
-                description={service.description}
-                basePrice={service.basePrice}
-                duration={service.duration}
-                onBook={() => handleBookService(service.type, service.title)}
-              />
-            ))}
-          </div>
-        </div>
-      </section>
       {/* About Section */}
       <section id="about" className="py-16 px-2 sm:px-4 bg-gradient-to-r from-purple-900/50 to-indigo-900/50" data-aos="fade-up">
         <div className="max-w-6xl mx-auto">
@@ -348,6 +322,32 @@ const Home: React.FC = () => {
             <div className="relative flex justify-center items-center">
               <img src="/image.png" alt="Sakshi" className="w-64 h-64 object-cover rounded-2xl shadow-2xl border-4 border-yellow-400/30" />
             </div>
+          </div>
+        </div>
+      </section>
+      {/* Services Section */}
+      <section id="services" className="py-16 px-2 sm:px-4" data-aos="fade-up">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-12 sm:mb-16">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-teal-400 to-purple-400 bg-clip-text text-transparent font-unbounded drop-shadow-lg">
+              Sacred Services
+            </h2>
+            <p className="text-base sm:text-xl text-gray-300 max-w-3xl mx-auto">
+              Each service is crafted to guide you toward clarity, healing, and transformation
+            </p>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+            {services.map((service, index) => (
+              <ServiceCard
+                key={index}
+                icon={service.icon}
+                title={service.title}
+                description={service.description}
+                basePrice={service.basePrice}
+                duration={service.duration}
+                onBook={() => handleBookService(service.type, service.title)}
+              />
+            ))}
           </div>
         </div>
       </section>

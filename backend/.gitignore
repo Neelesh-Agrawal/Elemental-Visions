@@ -1,5 +1,3 @@
-admin-frontend/.env
-admin-frontend/node_modules/
 # Python cache
 __pycache__/
 *.py[cod]
