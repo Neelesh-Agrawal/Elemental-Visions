@@ -184,6 +184,27 @@ const OrderItemsTable: React.FC = () => {
     }
   };
 
+  const deleteOrderItem = async (orderId: number, itemId: number) => {
+    if (!confirm('Are you sure you want to delete this order item? This action cannot be undone.')) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/orders/${orderId}/items/${itemId}`, {
+        method: 'DELETE',
+      });
+      
+      if (!response.ok) throw new Error('Failed to delete order item');
+      
+      // Remove from local state
+      setOrderItems(orderItems.filter(item => !(item.order_id === orderId && item.id === itemId)));
+      
+    } catch (error) {
+      console.error('Error deleting order item:', error);
+      alert('Failed to delete order item. Please try again.');
+    }
+  };
+
   useEffect(() => {
     fetchOrderItems();
   }, []);
@@ -207,6 +228,11 @@ const OrderItemsTable: React.FC = () => {
                          item.phone.includes(searchTerm);
     const matchesStatus = statusFilter === 'all' || item.shippingStatus === statusFilter;
     return matchesSearch && matchesStatus;
+  }).sort((a, b) => {
+    // Sort delivered items to the bottom
+    if (a.shippingStatus === 'delivered' && b.shippingStatus !== 'delivered') return 1;
+    if (b.shippingStatus === 'delivered' && a.shippingStatus !== 'delivered') return -1;
+    return 0;
   });
 
   const getStatusColor = (status: string) => {
@@ -306,6 +332,7 @@ const OrderItemsTable: React.FC = () => {
               <th className="px-6 py-3 text-left text-xs font-medium text-amber-800 uppercase tracking-wider font-serif">Status</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-amber-800 uppercase tracking-wider font-serif">Action</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-amber-800 uppercase tracking-wider font-serif">Update</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-amber-800 uppercase tracking-wider font-serif">Delete</th>
             </tr>
           </thead>
           <tbody className="bg-white/60 backdrop-blur-sm divide-y divide-amber-200">
@@ -390,6 +417,14 @@ const OrderItemsTable: React.FC = () => {
                       ) : (
                         <>✓ Update</>
                       )}
+                    </button>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                    <button
+                      onClick={() => deleteOrderItem(item.order_id, item.id)}
+                      className="inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded-md text-white bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-all duration-200 font-serif"
+                    >
+                      🗑️ Delete
                     </button>
                   </td>
                 </tr>

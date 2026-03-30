@@ -43,12 +43,6 @@ const ServiceCheckoutForm: React.FC<ServiceCheckoutFormProps> = ({
         unit_price: item.form.price,
       }));
 
-      console.log('📦 Preparing service booking:', {
-        customer: formData,
-        items: orderItems,
-        total
-      });
-
       // Call API endpoint for service bookings
       const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
       const response = await fetch(`${apiUrl}/service-bookings/`, {
@@ -72,32 +66,28 @@ const ServiceCheckoutForm: React.FC<ServiceCheckoutFormProps> = ({
         throw new Error(errorData.message || 'Failed to place service booking.');
       }
 
-      const data = await response.json();
-      console.log('✅ Service booking created:', data);
+      await response.json();
 
       // Show success message and proceed to payment
-      alert('Service booking confirmed! Proceeding to payment...');
       onOrderComplete();
       
-    } catch (error) {
-      console.error('❌ Service booking error:', error);
-      alert(`Error placing service booking: ${error.message}. Please try again.`);
+    } catch {
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-gradient-to-br from-purple-900 to-indigo-900 rounded-2xl p-6 max-w-lg w-full max-h-[90vh] overflow-y-auto border border-purple-500/30">
+    <div className="fixed inset-0 bg-navy/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+      <div className="bg-gradient-to-br from-navy to-plum rounded-2xl p-6 max-w-lg w-full max-h-[90vh] overflow-y-auto border border-plum/30">
         <div className="flex justify-between items-center mb-6">
-          <h3 className="text-2xl font-bold text-white">Book Your Service</h3>
-          <button onClick={onClose} className="text-gray-400 hover:text-white text-2xl font-bold">&times;</button>
+          <h3 className="text-2xl font-bold text-sand">Book Your Service</h3>
+          <button onClick={onClose} className="text-navy/60 hover:text-sand text-2xl font-bold">&times;</button>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <label className="block text-purple-200 text-sm font-medium mb-2">
+            <label className="block text-sand/90 text-sm font-medium mb-2">
               Full Name *
             </label>
             <input
@@ -106,13 +96,13 @@ const ServiceCheckoutForm: React.FC<ServiceCheckoutFormProps> = ({
               placeholder="Enter your full name"
               value={formData.customer_name}
               onChange={handleChange}
-              className="w-full bg-black/30 border border-purple-500/30 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:border-yellow-400 focus:outline-none transition-colors"
+              className="w-full bg-navy/30 border border-plum/30 rounded-lg px-4 py-3 text-sand placeholder-navy/40 focus:border-teal focus:outline-none transition-colors"
               required
             />
           </div>
           
           <div>
-            <label className="block text-purple-200 text-sm font-medium mb-2">
+            <label className="block text-sand/90 text-sm font-medium mb-2">
               Email Address *
             </label>
             <input
@@ -121,13 +111,13 @@ const ServiceCheckoutForm: React.FC<ServiceCheckoutFormProps> = ({
               placeholder="Enter your email address"
               value={formData.email}
               onChange={handleChange}
-              className="w-full bg-black/30 border border-purple-500/30 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:border-yellow-400 focus:outline-none transition-colors"
+              className="w-full bg-navy/30 border border-plum/30 rounded-lg px-4 py-3 text-sand placeholder-navy/40 focus:border-teal focus:outline-none transition-colors"
               required
             />
           </div>
           
           <div>
-            <label className="block text-purple-200 text-sm font-medium mb-2">
+            <label className="block text-sand/90 text-sm font-medium mb-2">
               Phone Number *
             </label>
             <input
@@ -136,7 +126,7 @@ const ServiceCheckoutForm: React.FC<ServiceCheckoutFormProps> = ({
               placeholder="Enter your phone number"
               value={formData.phone}
               onChange={handleChange}
-              className="w-full bg-black/30 border border-purple-500/30 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:border-yellow-400 focus:outline-none transition-colors"
+              className="w-full bg-navy/30 border border-plum/30 rounded-lg px-4 py-3 text-sand placeholder-navy/40 focus:border-teal focus:outline-none transition-colors"
               required
               pattern="[0-9]{10}"
               title="Please enter a valid 10-digit phone number"
@@ -144,17 +134,17 @@ const ServiceCheckoutForm: React.FC<ServiceCheckoutFormProps> = ({
           </div>
 
           {/* Service Summary */}
-          <div className="bg-black/20 rounded-lg p-4 border border-purple-500/20">
-            <h4 className="text-xl font-bold text-yellow-400 mb-3">Service Summary</h4>
-            <ul className="divide-y divide-purple-500/20">
+          <div className="bg-black/20 rounded-lg p-4 border border-plum/20">
+            <h4 className="text-xl font-bold text-teal mb-3">Service Summary</h4>
+            <ul className="divide-y divide-plum/20">
               {items.map((item, idx) => (
                 <li key={`${item.crystal.id}-${idx}`} className="py-3 flex items-center justify-between">
                   <div className="flex-1">
-                    <div className="font-semibold text-white text-lg">{item.crystal.name}</div>
-                    <div className="text-yellow-400 text-sm">{item.crystal.purpose}</div>
-                    <div className="text-purple-300 text-xs">{item.form.name}</div>
+                    <div className="font-semibold text-sand text-lg">{item.crystal.name}</div>
+                    <div className="text-teal text-sm">{item.crystal.purpose}</div>
+                    <div className="text-sand/70 text-xs">{item.form.name}</div>
                   </div>
-                  <div className="text-yellow-300 font-bold text-lg ml-4">
+                  <div className="text-teal font-bold text-lg ml-4">
                     ₹{item.form.price}{item.form.name === 'Raw' ? ' onwards' : ''}
                   </div>
                 </li>
@@ -163,10 +153,10 @@ const ServiceCheckoutForm: React.FC<ServiceCheckoutFormProps> = ({
           </div>
 
           {/* Total */}
-          <div className="bg-gradient-to-r from-yellow-400/10 to-orange-400/10 rounded-lg p-4 border-2 border-yellow-400/30">
+          <div className="bg-gradient-to-r from-sand/15 to-teal/10 rounded-lg p-4 border-2 border-teal/30">
             <div className="flex justify-between items-center">
-              <span className="text-xl font-bold text-white">Total Amount:</span>
-              <span className="text-2xl font-bold text-yellow-400">₹{total}</span>
+              <span className="text-xl font-bold text-sand">Total Amount:</span>
+              <span className="text-2xl font-bold text-teal">₹{total}</span>
             </div>
           </div>
 
@@ -176,8 +166,8 @@ const ServiceCheckoutForm: React.FC<ServiceCheckoutFormProps> = ({
             disabled={isSubmitting}
             className={`w-full py-4 rounded-lg font-bold text-lg transition-all duration-300 ${
               isSubmitting 
-                ? 'bg-gray-600 cursor-not-allowed' 
-                : 'bg-gradient-to-r from-green-600 to-teal-600 hover:from-green-700 hover:to-teal-700 transform hover:scale-105'
+                ? 'bg-navy/50 cursor-not-allowed' 
+                : 'bg-gradient-to-r from-teal to-navy hover:opacity-90 transform hover:scale-105'
             }`}
           >
             {isSubmitting ? (
@@ -192,8 +182,8 @@ const ServiceCheckoutForm: React.FC<ServiceCheckoutFormProps> = ({
         </form>
 
         {/* Info Note */}
-        <div className="mt-4 p-3 bg-blue-900/30 rounded-lg border border-blue-500/30">
-          <p className="text-blue-200 text-sm">
+        <div className="mt-4 p-3 bg-navy/40 rounded-lg border border-teal/30">
+          <p className="text-sand/90 text-sm">
             <strong>Note:</strong> After payment confirmation, we will contact you within 24 hours to schedule your session at your preferred time.
           </p>
         </div>

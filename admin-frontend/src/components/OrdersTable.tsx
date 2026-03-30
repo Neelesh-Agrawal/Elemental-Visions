@@ -65,6 +65,11 @@ const OrdersTable: React.FC = () => {
                          order.phone.includes(searchTerm);
     const matchesStatus = statusFilter === 'all' || order.paymentStatus === statusFilter;
     return matchesSearch && matchesStatus;
+  }).sort((a, b) => {
+    // Sort completed orders to the bottom
+    if (a.paymentStatus === 'approved' && b.paymentStatus !== 'approved') return 1;
+    if (b.paymentStatus === 'approved' && a.paymentStatus !== 'approved') return -1;
+    return 0;
   });
 
    const updatePaymentStatus = async (orderId: number) => {
@@ -103,6 +108,27 @@ const OrdersTable: React.FC = () => {
     } catch (error) {
       console.error('Error updating payment status:', error);
       // Show error to user
+    }
+  };
+
+  const deleteOrder = async (orderId: number) => {
+    if (!confirm('Are you sure you want to delete this order? This action cannot be undone.')) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`${apiUrl}/orders/${orderId}`, {
+        method: 'DELETE',
+      });
+      
+      if (!response.ok) throw new Error('Failed to delete order');
+      
+      // Remove from local state
+      setOrders(orders.filter(order => order.id !== orderId));
+      
+    } catch (error) {
+      console.error('Error deleting order:', error);
+      alert('Failed to delete order. Please try again.');
     }
   };
 
@@ -156,6 +182,7 @@ const OrdersTable: React.FC = () => {
               <th className="px-6 py-3 text-left text-xs font-medium text-amber-800 uppercase tracking-wider font-serif">Status</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-amber-800 uppercase tracking-wider font-serif">Action</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-amber-800 uppercase tracking-wider font-serif">Update</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-amber-800 uppercase tracking-wider font-serif">Delete</th>
             </tr>
           </thead>
           <tbody className="bg-white/60 backdrop-blur-sm divide-y divide-amber-200">
@@ -185,7 +212,7 @@ const OrdersTable: React.FC = () => {
                   </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm font-medium text-amber-900 font-serif">${order.amount}</div>
+                  <div className="text-sm font-medium text-amber-900 font-serif">₹{order.amount}</div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="text-sm text-amber-900 font-serif">{order.paidFor} <span className="text-amber-700">({order.type})</span></div>
@@ -215,6 +242,14 @@ const OrdersTable: React.FC = () => {
                     className={`inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded-md text-white ${statusSelections[order.id] && statusSelections[order.id] !== order.paymentStatus ? 'bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700' : 'bg-gray-300 cursor-not-allowed'} focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-all duration-200 font-serif`}
                   >
                     ✓ Update
+                  </button>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                  <button
+                    onClick={() => deleteOrder(order.id)}
+                    className="inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded-md text-white bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-all duration-200 font-serif"
+                  >
+                    🗑️ Delete
                   </button>
                 </td>
               </tr>

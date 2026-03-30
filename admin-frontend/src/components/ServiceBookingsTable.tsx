@@ -112,6 +112,27 @@ const ServiceBookingsTable: React.FC = () => {
     }
   };
 
+  const deleteBooking = async (bookingId: number) => {
+    if (!confirm('Are you sure you want to delete this booking? This action cannot be undone.')) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/service-bookings/${bookingId}`, {
+        method: 'DELETE',
+      });
+      
+      if (!response.ok) throw new Error('Failed to delete booking');
+      
+      // Remove from local state
+      setBookings(bookings.filter(booking => booking.id !== bookingId));
+      
+    } catch (error) {
+      console.error('Error deleting booking:', error);
+      alert('Failed to delete booking. Please try again.');
+    }
+  };
+
   useEffect(() => {
     fetchBookings();
   }, []);
@@ -127,6 +148,11 @@ const ServiceBookingsTable: React.FC = () => {
                          );
     const matchesStatus = statusFilter === 'all' || booking.status === statusFilter;
     return matchesSearch && matchesStatus;
+  }).sort((a, b) => {
+    // Sort completed bookings to the bottom
+    if (a.status === 'delivered' && b.status !== 'delivered') return 1;
+    if (b.status === 'delivered' && a.status !== 'delivered') return -1;
+    return 0;
   });
 
   const getStatusColor = (status: string) => {
@@ -242,6 +268,7 @@ const ServiceBookingsTable: React.FC = () => {
               <th className="px-6 py-3 text-left text-xs font-medium text-amber-800 uppercase tracking-wider font-serif">Action</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-amber-800 uppercase tracking-wider font-serif">Update</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-amber-800 uppercase tracking-wider font-serif">Feedback</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-amber-800 uppercase tracking-wider font-serif">Delete</th>
             </tr>
           </thead>
           <tbody className="bg-white/60 backdrop-blur-sm divide-y divide-amber-200">
@@ -347,6 +374,14 @@ const ServiceBookingsTable: React.FC = () => {
                     ) : (booking.status === 'delivered' || booking.status === 'shipped') && feedbackSent[booking.id] ? (
                       <span className="text-green-600 text-xs font-serif">Feedback sent</span>
                     ) : null}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                    <button
+                      onClick={() => deleteBooking(booking.id)}
+                      className="inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded-md text-white bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-all duration-200 font-serif"
+                    >
+                      🗑️ Delete
+                    </button>
                   </td>
                 </tr>
               );

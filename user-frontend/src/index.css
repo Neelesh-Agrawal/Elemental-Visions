@@ -1,35 +1,121 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Unbounded:wght@700&display=swap');
+
+@font-face {
+  font-family: 'Reborn';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/reborn.otf') format('opentype');
+}
+
+/* Gotham — local files in /public/fonts/Gotham-Font/ */
+@font-face {
+  font-family: 'Gotham';
+  font-style: normal;
+  font-weight: 300;
+  font-display: swap;
+  src: url('/fonts/Gotham-Font/GothamLight.ttf') format('truetype');
+}
+@font-face {
+  font-family: 'Gotham';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/Gotham-Font/GothamBook.ttf') format('truetype');
+}
+@font-face {
+  font-family: 'Gotham';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('/fonts/Gotham-Font/GothamMedium.ttf') format('truetype');
+}
+@font-face {
+  font-family: 'Gotham';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('/fonts/Gotham-Font/GothamMedium.ttf') format('truetype');
+}
+@font-face {
+  font-family: 'Gotham';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('/fonts/Gotham-Font/GothamBold.ttf') format('truetype');
+}
 
 body {
-  font-family: 'Poppins', Arial, sans-serif;
-  background: linear-gradient(135deg, #2d0b4e 0%, #1a1a40 100%);
-  color: #fff;
+  font-family: 'Gotham', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI',
+    sans-serif;
+  @apply bg-sand text-navy;
 }
 
-h1, h2, h3, h4, h5, h6 {
-  font-family: 'Unbounded', 'Poppins', Arial, sans-serif;
-  letter-spacing: 0.02em;
+/* Reborn: single master weight + distinctive alternates; faux bold destroys the Art Deco shapes */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.font-heading {
+  font-family: 'Reborn', Georgia, serif;
+  letter-spacing: 0.06em;
+  font-weight: 400;
+  font-synthesis: none;
+  font-feature-settings: 'kern' 1, 'liga' 1, 'calt' 1, 'ss01' 1, 'ss02' 1;
+  font-variant-ligatures: common-ligatures contextual;
+  text-rendering: geometricPrecision;
 }
 
-button, .btn {
-  font-family: 'Poppins', Arial, sans-serif;
+/* Tailwind font-bold / font-extrabold would otherwise synthesize a fake heavy weight */
+.font-heading.font-bold,
+.font-heading.font-extrabold,
+h1.font-bold,
+h1.font-extrabold,
+h2.font-bold,
+h2.font-extrabold,
+h3.font-bold,
+h3.font-extrabold,
+h4.font-bold,
+h4.font-extrabold,
+h5.font-bold,
+h5.font-extrabold,
+h6.font-bold,
+h6.font-extrabold {
+  font-weight: 400;
+  font-synthesis: none;
+}
+
+button,
+.btn {
+  font-family: 'Gotham', system-ui, sans-serif;
   font-weight: 600;
   letter-spacing: 0.03em;
 }
 
 /* Glassmorphism utility */
 .glass {
-  background: rgba(255,255,255,0.08);
-  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.18);
-  backdrop-filter: blur(8px);
+  background: rgba(255, 255, 255, 0.55);
+  box-shadow: 0 8px 32px 0 rgba(15, 35, 70, 0.08);
+  backdrop-filter: blur(10px);
   border-radius: 1.5rem;
-  border: 1.5px solid rgba(255,255,255,0.18);
+  border: 1.5px solid rgba(15, 35, 70, 0.1);
 }
 
 /* Modern shadow for cards */
 .card-shadow {
-  box-shadow: 0 4px 32px 0 rgba(80, 0, 120, 0.18), 0 1.5px 8px 0 rgba(255, 200, 55, 0.08);
+  box-shadow: 0 4px 32px 0 rgba(88, 32, 69, 0.12),
+    0 1.5px 8px 0 rgba(37, 96, 96, 0.12);
+}
+
+/* Hero main title: tighter tracking + one line on all viewports */
+section#home .hero-primary-title {
+  letter-spacing: 0.02em;
+  word-spacing: normal;
+  white-space: nowrap;
+  font-size: clamp(1.45rem, 2.75vw + 0.95rem, 3.85rem);
+  line-height: 1.08;
 }

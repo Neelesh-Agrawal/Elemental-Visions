@@ -1,9 +1,14 @@
-import React, { useState, useEffect, createContext, useContext } from 'react';
+import React, { useState, useEffect, useRef, createContext, useContext } from 'react';
 import Navbar from '../components/Navbar';
+import { BrandLogo } from '../components/BrandLogo';
+import { AboutSection } from '../components/AboutSection';
 import { Footer } from '../components/Footer';
-import { Calendar, Star, Eye, Sparkles, Heart, Gem, ChevronLeft, ChevronRight, Phone, Mail, MapPin, Instagram, Facebook, Twitter } from 'lucide-react';
+import { Calendar, ChevronLeft, ChevronRight, Phone, Mail, MapPin, Instagram, Facebook, Twitter } from 'lucide-react';
 import { crystals } from '../data/crystals';
-import ServiceCard from '../components/ServiceCard';
+import FeaturedServiceCard, {
+  type FeaturedServiceMeta,
+} from '../components/FeaturedServiceCard';
+import FeaturedServiceModal from '../components/FeaturedServiceModal';
 import CrystalCard from '../components/CrystalCard';
 import TestimonialCard from '../components/TestimonialCard';
 import BookingModal from '../components/BookingModal';
@@ -46,7 +51,7 @@ const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => 
         updated[idx].quantity += quantity;
         return updated;
       }
-      return [...prev, { crystal, form, quantity }];
+      return [...prev, { crystal, form, quantity, type: 'crystal' }];
     });
   };
 
@@ -73,46 +78,43 @@ const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => 
   );
 };
 
-const services = [
+const featuredHomeServices: FeaturedServiceMeta[] = [
   {
-    icon: <Star className="w-8 h-8" />,
-    title: "Tarot Readings",
-    description: "Navigate life's crossroads with symbolic guidance. Choose from different question packages with personalized spreads.",
-    basePrice: "From ₹600",
-    duration: "10-30 mins",
-    type: 'tarot'
+    id: 'arcana',
+    title: 'ARCANA INSIGHTS',
+    description:
+      'Arcana refers to the symbolic language of tarot cards. Gain insight into the energies shaping your life. Tarot offers clarity and helps you explore possible paths.',
+    bookingType: 'tarot',
+    bookingName: 'Tarot Readings',
+    artworkSrc: '/featured/arcana-insights.png',
   },
   {
-    icon: <Eye className="w-8 h-8" />,
-    title: "Palm Reading",
-    description: "Your hands reveal your destiny. Explore innate gifts and future pathways through sacred line analysis.",
-    basePrice: "₹999",
-    duration: "20 mins",
-    type: 'palm'
+    id: 'alignment',
+    title: 'ALIGNMENT SESSIONS',
+    description:
+      'Align your mindset, intentions, and actions with your goals. This process helps you build clarity and move forward with purpose.',
+    bookingType: 'coaching',
+    bookingName: 'Life Coaching',
+    artworkSrc: '/featured/alignment-sessions.png',
   },
   {
-    icon: <Sparkles className="w-8 h-8" />,
-    title: "Karma Analysis",
-    description: `Curious about the karmic patterns holding you back?\nGet your Pending Karma Analysis done and understand the hidden lessons your soul is still carrying`,
-    basePrice: "₹999",
-    type: 'karma'
+    id: 'karmic',
+    title: 'KARMIC PATTERN INSIGHTS',
+    description:
+      "Some patterns don't just come from the present. These insights help you recognise unresolved cycles that may be affecting your current path.",
+    bookingType: 'karma',
+    bookingName: 'Karma Analysis',
+    artworkSrc: '/featured/karmic-insights.png',
   },
   {
-    icon: <Heart className="w-8 h-8" />,
-    title: "Life Coaching",
-    description: '“When your mind is clear and your aura is light, your path naturally opens." Book your session today and start your transformation.',
-    basePrice: "From ₹999",
-    duration: "15-30 mins",
-    type: 'coaching'
+    id: 'crystals',
+    title: 'CRYSTALS CURATION',
+    description:
+      'A curated selection of crystals chosen for their natural energy and purpose. Find pieces that align with your intentions, enhance focus, and support your inner balance.',
+    bookingType: 'crystal',
+    bookingName: 'Crystal Healing',
+    artworkSrc: '/featured/crystals-curation.png',
   },
-  {
-    icon: <Gem className="w-8 h-8" />,
-    title: "Crystal Healing",
-    description: `In  a Crystal Healing Session, I use intuitively selected crystals to cleanse, balance, and activate your energy centers (chakras).\nThis gentle yet transformative modality helps you:\n\n🔮 Release emotional blocks\n💖 Heal past traumas\n🧘‍♀️ Regain energetic balance\n🌈 Strengthen aura and spiritual connection\n🌿 Feel lighter, clearer, and more aligned`,
-    basePrice: "From ₹299",
-    duration: "Varies",
-    type: 'crystal'
-  }
 ];
 
 const testimonials = [
@@ -154,35 +156,35 @@ const CrystalFormModal: React.FC<{
   if (!isOpen || !crystal) return null;
   const selectedForms = crystal.forms.filter(f => quantities[f.name] > 0);
   return (
-    <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4">
-      <div className="bg-gradient-to-br from-[#1a1333] to-[#2d0b4e] rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto border border-purple-500/30 shadow-2xl flex flex-col md:flex-row">
+    <div className="fixed inset-0 bg-navy/80 z-50 flex items-center justify-center p-4">
+      <div className="bg-gradient-to-br from-navy to-plum rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto border border-plum/30 shadow-2xl flex flex-col md:flex-row">
         {/* Left: Crystal Info */}
-        <div className="md:w-1/2 p-6 flex flex-col items-center justify-center border-b md:border-b-0 md:border-r border-purple-500/20">
-          <img src={crystal.image} alt={crystal.name} className="w-40 h-40 object-cover rounded-2xl border-4 border-yellow-400/40 mb-4" />
-          <div className="text-3xl font-extrabold text-yellow-400 font-unbounded uppercase mb-2 text-center">{crystal.name}</div>
-          <div className="text-lg font-bold text-purple-200 mb-2 text-center">{crystal.purpose}</div>
-          <div className="text-base text-white mb-4 text-center">{crystal.description}</div>
+        <div className="md:w-1/2 p-6 flex flex-col items-center justify-center border-b md:border-b-0 md:border-r border-plum/20">
+          <img src={crystal.image} alt={crystal.name} className="w-40 h-40 object-cover rounded-2xl border-4 border-teal/40 mb-4" />
+          <div className="text-3xl font-extrabold text-teal font-heading uppercase mb-2 text-center">{crystal.name}</div>
+          <div className="text-lg font-bold text-sand/90 mb-2 text-center">{crystal.purpose}</div>
+          <div className="text-base text-sand mb-4 text-center">{crystal.description}</div>
           <div className="flex flex-wrap gap-2 justify-center">
             {crystal.properties.map((prop, i) => (
-              <span key={i} className="bg-purple-700/60 text-purple-200 px-3 py-1 rounded-full text-xs font-semibold">{prop}</span>
+              <span key={i} className="bg-plum/50 text-sand px-3 py-1 rounded-full text-xs font-semibold">{prop}</span>
             ))}
           </div>
         </div>
         {/* Right: Form Grid */}
         <div className="md:w-1/2 p-6 flex flex-col">
-          <div className="text-2xl font-bold text-white font-unbounded mb-4 text-center md:text-left">Select Form(s)</div>
+          <div className="text-2xl font-bold text-sand font-heading mb-4 text-center md:text-left">Select Form(s)</div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             {crystal.forms.map(form => (
-              <div key={form.name} className="bg-black/30 rounded-xl p-4 flex flex-col items-center border-2 border-yellow-400/30">
-                <img src={form.image} alt={form.name} className="w-20 h-20 object-cover rounded-lg mb-2 border-2 border-yellow-400/40" />
-                <div className="text-sm font-extrabold text-yellow-400 font-unbounded uppercase mb-1 text-center leading-none">{form.name}</div>
-                <div className="text-base font-bold text-yellow-400 mb-1">
+              <div key={form.name} className="bg-navy/30 rounded-xl p-4 flex flex-col items-center border-2 border-teal/30">
+                <img src={form.image} alt={form.name} className="w-20 h-20 object-cover rounded-lg mb-2 border-2 border-teal/40" />
+                <div className="text-sm font-extrabold text-teal font-heading uppercase mb-1 text-center leading-none">{form.name}</div>
+                <div className="text-base font-bold text-teal mb-1">
                   ₹{form.price}{form.name === 'Raw' ? ' onwards' : ''}
                 </div>
                 <div className="flex items-center gap-2 mt-2">
-                  <button onClick={() => setQuantities(q => ({ ...q, [form.name]: Math.max(0, (q[form.name] || 0) - 1) }))} className="w-8 h-8 rounded-full bg-yellow-400 text-black font-bold text-xl flex items-center justify-center">-</button>
-                  <span className="text-xl font-bold text-white w-6 text-center">{quantities[form.name] || 0}</span>
-                  <button onClick={() => setQuantities(q => ({ ...q, [form.name]: (q[form.name] || 0) + 1 }))} className="w-8 h-8 rounded-full bg-yellow-400 text-black font-bold text-xl flex items-center justify-center">+</button>
+                  <button onClick={() => setQuantities(q => ({ ...q, [form.name]: Math.max(0, (q[form.name] || 0) - 1) }))} className="w-8 h-8 rounded-full bg-teal text-navy font-bold text-xl flex items-center justify-center">-</button>
+                  <span className="text-xl font-bold text-sand w-6 text-center">{quantities[form.name] || 0}</span>
+                  <button onClick={() => setQuantities(q => ({ ...q, [form.name]: (q[form.name] || 0) + 1 }))} className="w-8 h-8 rounded-full bg-teal text-navy font-bold text-xl flex items-center justify-center">+</button>
                 </div>
               </div>
             ))}
@@ -197,20 +199,18 @@ const CrystalFormModal: React.FC<{
               );
               onClose();
             }}
-            className={`mt-8 w-full py-3 rounded-lg font-bold text-lg transition-all duration-300 shadow-lg ${selectedForms.length === 0 ? 'bg-gray-500 cursor-not-allowed' : 'bg-gradient-to-r from-green-600 to-teal-600 hover:from-green-700 hover:to-teal-700 text-white'}`}
+            className={`mt-8 w-full py-3 rounded-lg font-bold text-lg transition-all duration-300 shadow-lg ${selectedForms.length === 0 ? 'bg-navy/40 cursor-not-allowed' : 'bg-gradient-to-r from-teal to-navy hover:opacity-90 text-sand'}`}
           >
             Add to Cart
           </button>
         </div>
-        <button onClick={onClose} className="absolute top-4 right-4 text-yellow-400 hover:text-white text-3xl font-bold bg-black/30 rounded-full w-10 h-10 flex items-center justify-center">&times;</button>
+        <button onClick={onClose} className="absolute top-4 right-4 text-teal hover:text-sand text-3xl font-bold bg-navy/30 rounded-full w-10 h-10 flex items-center justify-center">&times;</button>
       </div>
     </div>
   );
 };
 
 const Home: React.FC = () => {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-
   const [bookingService, setBookingService] = useState<{ type: string; name: string } | null>(null);
   const [isServiceBookingModalOpen, setIsServiceBookingModalOpen] = useState(false);
   const [isServiceBookingFormOpen, setIsServiceBookingFormOpen] = useState(false);
@@ -220,16 +220,49 @@ const Home: React.FC = () => {
     session: any;
   } | null>(null);
   const [isCrystalModalOpen, setIsCrystalModalOpen] = useState(false);
-  const [selectedCrystal, setSelectedCrystal] = useState<any>(null);
+  const [selectedCrystal] = useState<any>(null);
   const [crystalScrollPosition, setCrystalScrollPosition] = useState(0);
   const { cart, addToCart, updateCartQuantity, removeFromCart } = useCart();
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
   const [isCrystalFormModalOpen, setIsCrystalFormModalOpen] = useState(false);
   const [crystalForModal, setCrystalForModal] = useState<Crystal | null>(null);
+  const [featuredDetail, setFeaturedDetail] = useState<FeaturedServiceMeta | null>(null);
+  const featuredServicesScrollRef = useRef<HTMLDivElement>(null);
+  const [featuredCarouselIndex, setFeaturedCarouselIndex] = useState(0);
   const navigate = useNavigate();
 
   useEffect(() => { AOS.init({ once: true, duration: 900, offset: 60 }); }, []);
+
+  useEffect(() => {
+    const container = featuredServicesScrollRef.current;
+    if (!container) return;
+
+    const syncIndex = () => {
+      if (typeof window !== 'undefined' && window.innerWidth >= 640) return;
+      const center = container.scrollLeft + container.clientWidth / 2;
+      const items = Array.from(container.children) as HTMLElement[];
+      let best = 0;
+      let bestDist = Infinity;
+      items.forEach((child, i) => {
+        const mid = child.offsetLeft + child.offsetWidth / 2;
+        const d = Math.abs(center - mid);
+        if (d < bestDist) {
+          bestDist = d;
+          best = i;
+        }
+      });
+      setFeaturedCarouselIndex(best);
+    };
+
+    syncIndex();
+    container.addEventListener('scroll', syncIndex, { passive: true });
+    window.addEventListener('resize', syncIndex);
+    return () => {
+      container.removeEventListener('scroll', syncIndex);
+      window.removeEventListener('resize', syncIndex);
+    };
+  }, []);
 
   // Responsive scroll for crystals
   const scrollCrystals = (direction: 'left' | 'right') => {
@@ -252,8 +285,6 @@ const Home: React.FC = () => {
 
   // Handle service booking (Book Now)
   const handleServiceBookNow = (serviceType: string, serviceName: string, session: any) => {
-    console.log('📅 Service book now called with:', { serviceType, serviceName, session });
-    
     setSelectedServiceForBooking({
       serviceType,
       serviceName,
@@ -266,8 +297,6 @@ const Home: React.FC = () => {
 
   // Handle service booking form submission
   const handleServiceBookingSubmit = async (bookingData: ServiceBookingData) => {
-    console.log('📦 Service booking submission:', bookingData);
-    
     try {
       // Prepare service booking data for backend
       const orderData = {
@@ -276,16 +305,6 @@ const Home: React.FC = () => {
         quantity: 1,
         unit_price: bookingData.total_amount
       };
-
-      console.log('📦 Preparing service booking:', {
-        customer: {
-          customer_name: bookingData.customer_name,
-          email: bookingData.email,
-          phone: bookingData.phone
-        },
-        items: [orderData],
-        total: bookingData.total_amount
-      });
 
       // Call API endpoint for service bookings
       const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
@@ -310,7 +329,6 @@ const Home: React.FC = () => {
       }
 
       const data = await response.json();
-      console.log('✅ Service booking created:', data);
 
       // Close form and redirect to payment
       setIsServiceBookingFormOpen(false);
@@ -337,9 +355,7 @@ const Home: React.FC = () => {
         } 
       });
       
-    } catch (error) {
-      console.error('❌ Service booking error:', error);
-      alert(`Error placing service booking: ${error.message}. Please try again.`);
+    } catch {
     }
   };
   const handleBookCrystal = (crystal: Crystal) => {
@@ -355,144 +371,176 @@ const Home: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-indigo-900 to-black text-white overflow-x-hidden">
-      {/* Animated Background Elements */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-20 left-10 w-2 h-2 bg-yellow-400 rounded-full animate-pulse"></div>
-        <div className="absolute top-40 right-20 w-1 h-1 bg-purple-300 rounded-full animate-ping"></div>
-        <div className="absolute bottom-40 left-20 w-3 h-3 bg-teal-400 rounded-full animate-bounce"></div>
-        <div className="absolute top-60 left-1/3 w-1 h-1 bg-yellow-300 rounded-full animate-pulse"></div>
-        <div className="absolute bottom-60 right-1/3 w-2 h-2 bg-purple-400 rounded-full animate-ping"></div>
-      </div>
+    <div className="min-h-screen bg-sand text-navy overflow-x-hidden">
       <Navbar cartCount={cart.length} onCartClick={() => setIsCartOpen(true)} />
-      {/* Hero Section */}
-      <section id="home" className="min-h-screen flex items-center justify-center relative pt-24 pb-12 sm:pt-32 sm:pb-20" data-aos="fade-up">
-        <div className="text-center max-w-4xl mx-auto px-4">
-          <div className="mb-8">
-            <img src="/image.png" alt="Elemental Visions Logo" className="w-32 h-32 mx-auto mb-6 rounded-full shadow-2xl" />
-          </div>
-          <h1 className="text-4xl sm:text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-yellow-400 via-orange-400 to-red-400 bg-clip-text text-transparent font-unbounded drop-shadow-lg">
+
+      {/* ── HERO SECTION ── */}
+      <section
+        id="home"
+        className="relative flex min-h-screen flex-col items-center justify-center pb-16 pt-24 sm:pt-28"
+        data-aos="fade-up"
+      >
+        <div className="mx-auto flex w-full max-w-3xl flex-col items-center px-4 text-center sm:max-w-4xl">
+          <BrandLogo variant="hero" />
+
+          <h1
+            className="hero-primary-title font-heading mt-8 font-bold"
+            style={{ color: '#582045' }}
+          >
             Elemental Visions
           </h1>
-          <p className="text-lg sm:text-xl md:text-2xl mb-4 text-purple-200">
-            ✨ Where Ancient Wisdom Meets Modern Insight ✨
+
+          <p
+            className="mt-5 text-base sm:text-lg md:text-xl"
+            style={{
+              fontFamily: "'Gotham', system-ui, sans-serif",
+              fontWeight: 400,
+              letterSpacing: '0.04em',
+              color: '#582045',
+            }}
+          >
+            Understanding your patterns. Aligning your path.
           </p>
-          <p className="text-base sm:text-lg mb-8 text-gray-300 max-w-2xl mx-auto">
+
+          {/* Supporting text */}
+          <p
+            className="mt-3 max-w-xl text-sm sm:text-base"
+            style={{
+              fontFamily: "'Gotham', system-ui, sans-serif",
+              fontWeight: 300,
+              letterSpacing: '0.03em',
+              color: 'rgba(15, 35, 70, 0.55)',
+              lineHeight: 1.7,
+            }}
+          >
             Unlock your destiny through mystical arts • Transform your journey with sacred guidance • Discover your true path with Sakshi
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+
+          {/* CTAs */}
+          <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
             <a href="#contact">
-              <button 
-                className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 px-8 py-4 rounded-full font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg w-full sm:w-auto"
+              <button
+                style={{
+                  fontFamily: "'Gotham', system-ui, sans-serif",
+                  fontSize: '12px',
+                  fontWeight: 500,
+                  letterSpacing: '0.18em',
+                  textTransform: 'uppercase',
+                  color: '#DAC6AB',
+                  background: '#0F2346',
+                  border: 'none',
+                  borderRadius: '9999px',
+                  padding: '14px 32px',
+                  cursor: 'pointer',
+                  transition: 'background 0.25s ease, opacity 0.25s ease',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  whiteSpace: 'nowrap',
+                }}
+                onMouseEnter={e => ((e.currentTarget as HTMLElement).style.opacity = '0.92')}
+                onMouseLeave={e => ((e.currentTarget as HTMLElement).style.opacity = '1')}
               >
-                <Calendar className="w-5 h-5 inline mr-2" />
+                <Calendar className="h-4 w-4" strokeWidth={1.75} />
                 Book Your Session
               </button>
             </a>
+
             <a href="#services">
-              <button 
-                className="border-2 border-yellow-400 text-yellow-400 hover:bg-yellow-400 hover:text-black px-8 py-4 rounded-full font-semibold transition-all duration-300 w-full sm:w-auto"
+              <button
+                style={{
+                  fontFamily: "'Gotham', system-ui, sans-serif",
+                  fontSize: '12px',
+                  fontWeight: 500,
+                  letterSpacing: '0.18em',
+                  textTransform: 'uppercase',
+                  color: '#0F2346',
+                  background: 'transparent',
+                  border: '1px solid rgba(15, 35, 70, 0.35)',
+                  borderRadius: '9999px',
+                  padding: '14px 32px',
+                  cursor: 'pointer',
+                  transition: 'border-color 0.25s ease, background 0.25s ease',
+                  whiteSpace: 'nowrap',
+                }}
+                onMouseEnter={e => {
+                  const el = e.currentTarget as HTMLElement;
+                  el.style.borderColor = '#0F2346';
+                  el.style.background = 'rgba(15, 35, 70, 0.05)';
+                }}
+                onMouseLeave={e => {
+                  const el = e.currentTarget as HTMLElement;
+                  el.style.borderColor = 'rgba(15, 35, 70, 0.35)';
+                  el.style.background = 'transparent';
+                }}
               >
                 Explore Services
               </button>
             </a>
           </div>
+
+          <div className="mt-14 h-px w-full max-w-[200px] bg-navy/15" aria-hidden />
         </div>
       </section>
-      {/* About Section */}
-      <section id="about" className="py-16 px-2 sm:px-4 bg-gradient-to-r from-purple-900/50 to-indigo-900/50" data-aos="fade-up">
-        <div className="max-w-6xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-center">
-            <div>
-              <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-yellow-400 to-orange-400 bg-clip-text text-transparent font-unbounded drop-shadow-lg">
-                Guiding you with Tarot, Intuition & Vision
-              </h2>
-              <p className="text-base sm:text-lg text-gray-300 mb-6 leading-relaxed">
-                At Elemental Visions, I weave a sacred space where seekers come home to their inner truth.
-                Through Tarot, Palmistry, Crystals, and Intuitive whispers, I listen to the language of the universe—
-                a language written in symbols, synchronicities, and the dance of the elements.
-              </p>
-              <p className="text-base sm:text-lg text-gray-300 mb-6 leading-relaxed">
-                If your heart longs for clarity in love, career, or destiny,
-                if you are drawn to the healing light of crystals,
-                if your soul seeks to remember its deepest essence—
-                I am here to walk beside you, with compassion, intuition, and sacred vision.
-              </p>
-              <p className="text-base sm:text-lg text-gray-300 mb-8 leading-relaxed font-medium text-center italic">
-                Step into the mystery. The cards await. The vision unfolds.
-              </p>
-              
-              <div className="mb-8">
-                <h3 className="text-2xl font-bold mb-4 bg-gradient-to-r from-teal-400 to-purple-400 bg-clip-text text-transparent">
-                  What Awaits You Here:
-                </h3>
-                <div className="space-y-3 text-gray-300">
-                  <div className="flex items-start space-x-3">
-                    <span className="text-yellow-400 font-bold">✨</span>
-                    <div>
-                      <span className="font-semibold text-yellow-400">Tarot Readings:</span> Whispers of guidance woven through the cards, illuminating the path ahead.
-                    </div>
-                  </div>
-                  <div className="flex items-start space-x-3">
-                    <span className="text-yellow-400 font-bold">🖐️</span>
-                    <div>
-                      <span className="font-semibold text-yellow-400">Palmistry:</span> The ancient story etched in your hands, revealing the wisdom you already carry.
-                    </div>
-                  </div>
-                  <div className="flex items-start space-x-3">
-                    <span className="text-yellow-400 font-bold">💎</span>
-                    <div>
-                      <span className="font-semibold text-yellow-400">Crystal Guidance:</span> Sacred stones attuned to heal, align, and awaken your energy.
-                    </div>
-                  </div>
-                  <div className="flex items-start space-x-3">
-                    <span className="text-yellow-400 font-bold">📚</span>
-                    <div>
-                      <span className="font-semibold text-yellow-400">Courses & Resources:</span> A doorway to learn, explore, and journey deeper into the mysteries of Tarot.
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-4 mb-8">
-                <div className="text-center p-4 bg-purple-800/30 rounded-lg">
-                  <div className="text-2xl font-bold text-yellow-400">1000+</div>
-                  <div className="text-sm text-purple-300">Readings Given</div>
-                </div>
-                <div className="text-center p-4 bg-purple-800/30 rounded-lg">
-                  <div className="text-2xl font-bold text-yellow-400">5+</div>
-                  <div className="text-sm text-purple-300">Years Experience</div>
-                </div>
-              </div>
-            </div>
-            <div className="relative flex justify-center items-center">
-              <img src="/image.png" alt="Sakshi" className="w-64 h-64 object-cover rounded-2xl shadow-2xl border-4 border-yellow-400/30" />
-            </div>
-          </div>
-        </div>
-      </section>
+      <AboutSection />
       {/* Services Section */}
       <section id="services" className="py-16 px-2 sm:px-4" data-aos="fade-up">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-12 sm:mb-16">
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-teal-400 to-purple-400 bg-clip-text text-transparent font-unbounded drop-shadow-lg">
+            <h2 className="font-heading mb-6 inline-block bg-gradient-to-r from-navy via-plum to-teal bg-clip-text px-1 pb-0.5 pt-[0.12em] text-3xl font-bold leading-[1.25] text-transparent sm:text-4xl sm:leading-[1.22] md:text-5xl md:leading-[1.2]">
               Sacred Services
             </h2>
-            <p className="text-base sm:text-xl text-gray-300 max-w-3xl mx-auto">
+            <p className="mx-auto max-w-3xl text-base text-navy/70 sm:text-xl">
               Each service is crafted to guide you toward clarity, healing, and transformation
             </p>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-            {services.map((service, index) => (
-              <ServiceCard
-                key={index}
-                icon={service.icon}
-                title={service.title}
-                description={service.description}
-                basePrice={service.basePrice}
-                duration={service.duration}
-                onBook={() => handleBookService(service.type, service.title)}
-              />
+          <div
+            ref={featuredServicesScrollRef}
+            className="-mx-1 flex snap-x snap-mandatory gap-4 overflow-x-auto px-1 pb-1 [scrollbar-width:none] sm:mx-0 sm:grid sm:grid-cols-2 sm:gap-6 sm:overflow-visible sm:px-0 sm:pb-0 md:gap-8 lg:grid-cols-4 [&::-webkit-scrollbar]:h-0 [&::-webkit-scrollbar]:w-0"
+            style={{ msOverflowStyle: 'none' }}
+            aria-label="Featured services (swipe sideways on mobile)"
+          >
+            {featuredHomeServices.map((service) => (
+              <div
+                key={service.id}
+                className="w-[min(88vw,20rem)] shrink-0 snap-center sm:w-auto sm:min-w-0 sm:snap-none"
+              >
+                <FeaturedServiceCard service={service} onViewService={() => setFeaturedDetail(service)} />
+              </div>
             ))}
+          </div>
+          <div
+            className="mt-4 flex flex-col items-center gap-2 sm:hidden"
+            role="tablist"
+            aria-label="Scroll between services"
+          >
+            <div className="flex items-center justify-center gap-2">
+              {featuredHomeServices.map((service, i) => (
+                <button
+                  key={service.id}
+                  type="button"
+                  role="tab"
+                  aria-selected={i === featuredCarouselIndex}
+                  aria-label={`Show ${service.title}`}
+                  onClick={() => {
+                    const container = featuredServicesScrollRef.current;
+                    const child = container?.children[i] as HTMLElement | undefined;
+                    child?.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+                  }}
+                  className={`rounded-full transition-all duration-200 ${
+                    i === featuredCarouselIndex
+                      ? 'h-2 w-6 bg-teal'
+                      : 'h-2 w-2 bg-navy/25 hover:bg-navy/40'
+                  }`}
+                />
+              ))}
+            </div>
+            <p
+              className="text-center text-[11px] font-medium uppercase tracking-[0.2em] text-navy/45"
+              style={{ fontFamily: "'Gotham', system-ui, sans-serif" }}
+            >
+              Swipe for more
+            </p>
           </div>
         </div>
       </section>
@@ -500,14 +548,14 @@ const Home: React.FC = () => {
       <section id="crystals" className="py-16 px-2 sm:px-4" data-aos="fade-up">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-12 sm:mb-16">
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-teal-400 to-purple-400 bg-clip-text text-transparent font-unbounded drop-shadow-lg">
+            <h2 className="font-heading mb-6 bg-gradient-to-r from-navy via-plum to-teal bg-clip-text text-3xl font-bold text-transparent sm:text-4xl md:text-5xl">
               Healing Crystals
             </h2>
-            <p className="text-base sm:text-xl text-gray-300 max-w-3xl mx-auto mb-4">
+            <p className="mx-auto mb-4 max-w-3xl text-base text-navy/70 sm:text-xl">
               Ethically sourced crystals charged with intention to amplify your spiritual journey
             </p>
-            <div className="bg-yellow-400/20 border border-yellow-400/40 rounded-lg p-3 max-w-2xl mx-auto">
-              <p className="text-sm text-yellow-300 font-medium">
+            <div className="bg-teal/10 border border-teal/40 rounded-lg p-3 max-w-2xl mx-auto">
+              <p className="text-sm text-navy font-medium">
                 ⚠️ Images are for reference only. Actual products may vary due to their natural nature.
               </p>
             </div>
@@ -515,24 +563,24 @@ const Home: React.FC = () => {
           <div className="relative">
             <button
               onClick={() => scrollCrystals('left')}
-              className="absolute left-2 top-1/2 transform -translate-y-1/2 z-20 bg-purple-600/80 hover:bg-purple-700 p-3 rounded-full transition-all duration-300 shadow-xl border-4 border-transparent"
+              className="absolute left-2 top-1/2 z-20 -translate-y-1/2 transform rounded-full border-4 border-transparent bg-plum p-3 text-sand shadow-xl transition-all duration-300 hover:bg-plum/90"
               aria-label="Scroll left"
             >
-              <ChevronLeft className="w-6 h-6" />
+              <ChevronLeft className="h-6 w-6" />
             </button>
             <button
               onClick={() => scrollCrystals('right')}
-              className="absolute right-2 top-1/2 transform -translate-y-1/2 z-20 bg-purple-600/80 hover:bg-purple-700 p-3 rounded-full transition-all duration-300 shadow-xl border-4 border-transparent"
+              className="absolute right-2 top-1/2 z-20 -translate-y-1/2 transform rounded-full border-4 border-transparent bg-plum p-3 text-sand shadow-xl transition-all duration-300 hover:bg-plum/90"
               aria-label="Scroll right"
             >
-              <ChevronRight className="w-6 h-6" />
+              <ChevronRight className="h-6 w-6" />
             </button>
             <div
               id="crystals-container"
               className="flex space-x-6 overflow-x-auto scrollbar-hide pb-4 px-6 sm:px-12 relative"
               style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
             >
-              {crystals.map((crystal, idx) => (
+              {crystals.map((crystal) => (
                 <CrystalCard
                   key={crystal.id}
                   image={crystal.image || ''}
@@ -550,13 +598,13 @@ const Home: React.FC = () => {
         </div>
       </section>
       {/* Testimonials Section */}
-      <section className="py-16 px-2 sm:px-4 bg-gradient-to-r from-purple-900/50 to-indigo-900/50" data-aos="fade-up">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-12 sm:mb-16">
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-yellow-400 to-orange-400 bg-clip-text text-transparent font-unbounded drop-shadow-lg">
+      <section className="bg-sand py-16 px-2 sm:px-4" data-aos="fade-up">
+        <div className="mx-auto max-w-6xl">
+          <div className="mb-12 text-center sm:mb-16">
+            <h2 className="font-heading mb-6 px-1 pb-0.5 pt-[0.12em] text-3xl font-bold leading-[1.25] text-plum sm:text-4xl sm:leading-[1.22] md:text-5xl md:leading-[1.2]">
               Client Transformations
             </h2>
-            <p className="text-base sm:text-xl text-gray-300">
+            <p className="text-base text-navy/70 sm:text-xl">
               Real stories from souls who found their path
             </p>
           </div>
@@ -577,73 +625,87 @@ const Home: React.FC = () => {
       <section id="contact" className="py-16 px-2 sm:px-4">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-12 sm:mb-16">
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-teal-400 to-purple-400 bg-clip-text text-transparent font-unbounded drop-shadow-lg">
+            <h2 className="font-heading mb-6 inline-block bg-gradient-to-r from-navy via-plum to-teal bg-clip-text px-1 pb-0.5 pt-[0.12em] text-3xl font-bold leading-[1.25] text-transparent sm:text-4xl sm:leading-[1.22] md:text-5xl md:leading-[1.2]">
               Begin Your Journey
             </h2>
-            <p className="text-base sm:text-xl text-gray-300">
+            <p className="text-base text-navy/70 sm:text-xl">
               Ready to illuminate your path? Let's connect
             </p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
+          <div className="grid grid-cols-1 gap-8 md:grid-cols-2 md:gap-12">
             <div>
-              <h3 className="text-2xl font-bold mb-6 text-white">Get in Touch</h3>
+              <h3 className="mb-6 text-2xl font-bold text-navy">Get in Touch</h3>
               <div className="space-y-6">
-                <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-4 space-y-2 sm:space-y-0">
-                  <Phone className="w-6 h-6 text-yellow-400" />
-                  <span className="text-gray-300">+91 9176133139</span>
+                <div className="flex items-center space-x-4">
+                  <Phone className="h-6 w-6 shrink-0 text-teal" />
+                  <a
+                    href="tel:+919176133139"
+                    className="min-w-0 text-navy/80 no-underline hover:text-teal"
+                  >
+                    +91 9176133139
+                  </a>
                 </div>
                 <div className="flex items-center space-x-4">
-                  <Mail className="w-6 h-6 text-yellow-400" />
-                  <span className="text-gray-300">elementalvisions.in@gmail.com</span>
+                  <Mail className="h-6 w-6 shrink-0 text-teal" />
+                  <span className="text-navy/80">elementalvisions.in@gmail.com</span>
                 </div>
                 <div className="flex items-center space-x-4">
-                  <MapPin className="w-6 h-6 text-yellow-400" />
-                  <span className="text-gray-300">India</span>
+                  <MapPin className="h-6 w-6 shrink-0 text-teal" />
+                  <span className="text-navy/80">India</span>
                 </div>
               </div>
               <div className="mt-8">
-                <h4 className="text-lg font-semibold mb-4 text-white">Follow the Journey</h4>
+                <h4 className="mb-4 text-lg font-semibold text-navy">Follow the Journey</h4>
                 <div className="flex space-x-4">
                   <a href="https://www.instagram.com/elemental.visions/" target="_blank" rel="noopener noreferrer">
-                    <Instagram className="w-6 h-6 text-purple-400 hover:text-yellow-400 cursor-pointer transition-colors" />
+                    <Instagram className="h-6 w-6 cursor-pointer text-plum transition-colors hover:text-teal" />
                   </a>
-                  <Facebook className="w-6 h-6 text-purple-400 hover:text-yellow-400 cursor-pointer transition-colors" />
-                  <Twitter className="w-6 h-6 text-purple-400 hover:text-yellow-400 cursor-pointer transition-colors" />
+                  <Facebook className="h-6 w-6 cursor-pointer text-plum transition-colors hover:text-teal" />
+                  <Twitter className="h-6 w-6 cursor-pointer text-plum transition-colors hover:text-teal" />
                 </div>
               </div>
             </div>
-            <div className="bg-gradient-to-br from-purple-800/50 to-indigo-800/50 glass card-shadow rounded-2xl p-8 border border-purple-500/30">
-              <h3 className="text-2xl font-bold mb-6 text-white">Book a Session</h3>
+            <div className="card-shadow rounded-2xl border border-navy/15 bg-gradient-to-br from-navy to-plum p-8 shadow-lg">
+              <h3 className="mb-6 text-2xl font-bold text-sand">Book a Session</h3>
               <form className="space-y-6">
                 <div>
                   <input 
                     type="text" 
                     placeholder="Your Name"
-                    className="w-full bg-black/30 border border-purple-500/30 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:border-yellow-400 focus:outline-none transition-colors"
+                    className="w-full rounded-lg border border-sand/25 bg-navy/40 px-4 py-3 text-sand placeholder-sand/45 transition-colors focus:border-teal focus:outline-none"
                   />
                 </div>
                 <div>
                   <input 
                     type="email" 
                     placeholder="Your Email"
-                    className="w-full bg-black/30 border border-purple-500/30 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:border-yellow-400 focus:outline-none transition-colors"
+                    className="w-full rounded-lg border border-sand/25 bg-navy/40 px-4 py-3 text-sand placeholder-sand/45 transition-colors focus:border-teal focus:outline-none"
                   />
                 </div>
                 <div>
-                  <select className="w-full bg-black/30 border border-purple-500/30 rounded-lg px-4 py-3 text-white focus:border-yellow-400 focus:outline-none transition-colors">
-                    <option value="">Select Service</option>
-                    <option value="tarot">Tarot Reading</option>
-                    <option value="palm">Palm Reading</option>
-                    <option value="karma">Karma Analysis</option>
-                    <option value="coaching">Life Coaching</option>
-                    <option value="crystal">Crystal Healing</option>
+                  <select
+                    className="w-full rounded-lg border border-sand/25 bg-navy/40 px-4 py-3 text-sand transition-colors focus:border-teal focus:outline-none"
+                  >
+                    <option value="" style={{ backgroundColor: '#0F2346', color: '#DAC6AB' }}>Select Service</option>
+                    <option value="arcana-insights" style={{ backgroundColor: '#0F2346', color: '#DAC6AB' }}>
+                      Arcana Insights
+                    </option>
+                    <option value="karmic-pattern-insights" style={{ backgroundColor: '#0F2346', color: '#DAC6AB' }}>
+                      Karmic Pattern Insights
+                    </option>
+                    <option value="alignment-sessions" style={{ backgroundColor: '#0F2346', color: '#DAC6AB' }}>
+                      Alignment Sessions
+                    </option>
+                    <option value="crystals-curation" style={{ backgroundColor: '#0F2346', color: '#DAC6AB' }}>
+                      Crystals Curation
+                    </option>
                   </select>
                 </div>
                 <div>
                   <textarea 
                     placeholder="Tell me about your journey..."
                     rows={4}
-                    className="w-full bg-black/30 border border-purple-500/30 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:border-yellow-400 focus:outline-none transition-colors resize-none"
+                    className="w-full resize-none rounded-lg border border-sand/25 bg-navy/40 px-4 py-3 text-sand placeholder-sand/45 transition-colors focus:border-teal focus:outline-none"
                   ></textarea>
                 </div>
                 <button 
@@ -652,7 +714,7 @@ const Home: React.FC = () => {
                     const whatsappUrl = `https://wa.me/919176133139?text=${encodeURIComponent('Hi! I would like to book a session. Please let me know available time slots.')}`;
                     window.open(whatsappUrl, '_blank');
                   }}
-                  className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 py-3 rounded-lg font-semibold transition-all duration-300 transform hover:scale-105"
+                  className="w-full transform rounded-lg bg-teal py-3 font-semibold text-sand shadow-md transition-all duration-300 hover:scale-[1.02] hover:bg-teal/90"
                 >
                   Send Message via WhatsApp
                 </button>
@@ -661,6 +723,13 @@ const Home: React.FC = () => {
           </div>
         </div>
       </section>
+      <FeaturedServiceModal
+        isOpen={!!featuredDetail}
+        onClose={() => setFeaturedDetail(null)}
+        service={featuredDetail}
+        onBookSession={handleBookService}
+      />
+
       {/* Service Booking Modal - New booking flow */}
       {bookingService && (
         <ServiceBookingModal
@@ -697,7 +766,19 @@ const Home: React.FC = () => {
       {/* Cart Modal */}
       <Cart isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} items={cart} onUpdateQuantity={updateCartQuantity} onRemoveItem={removeFromCart} onProceedToCheckout={() => { setIsCartOpen(false); setIsCheckoutOpen(true); }} />
       {/* Checkout Form Modal */}
-      <CheckoutForm isOpen={isCheckoutOpen} onClose={() => setIsCheckoutOpen(false)} items={cart} total={cart.reduce((sum, item) => sum + (item.form.price * item.quantity), 0)} onOrderComplete={() => { setIsCheckoutOpen(false); navigate('/payment', { state: { items: cart, total: cart.reduce((sum, item) => sum + (item.form.price * item.quantity), 0) } }); }} />
+      <CheckoutForm isOpen={isCheckoutOpen} onClose={() => setIsCheckoutOpen(false)} items={cart} total={(() => {
+        const subtotal = cart.reduce((sum, item) => sum + (item.form.price * item.quantity), 0);
+        const hasCrystals = cart.some(item => item.type === 'crystal');
+        const shippingCharge = hasCrystals ? 150 : 0;
+        return subtotal + shippingCharge;
+      })()} onOrderComplete={() => { 
+        setIsCheckoutOpen(false); 
+        const subtotal = cart.reduce((sum, item) => sum + (item.form.price * item.quantity), 0);
+        const hasCrystals = cart.some(item => item.type === 'crystal');
+        const shippingCharge = hasCrystals ? 150 : 0;
+        const totalWithShipping = subtotal + shippingCharge;
+        navigate('/payment', { state: { items: cart, total: totalWithShipping } }); 
+      }} />
       <Footer />
     </div>
   );
