@@ -7,6 +7,8 @@ export interface Crystal {
   description: string;
   price?: number;
   category?: string;
+  properties?: string[];
+  forms?: CrystalForm[];
 }
 
 export interface CrystalForm {
@@ -25,7 +27,7 @@ export interface CartItem {
 export interface ServiceSession {
   id: string;
   name: string;
-  duration: string;
+  duration?: string;
   price: number | string;
   description: string;
 }
@@ -88,5 +90,5 @@ export interface BookingModalProps {
   onClose: () => void;
   serviceType: string;
   serviceName: string;
-  onAddToCart: (serviceType: string, serviceName: string, session: ServiceSession) => void;
+  onBookService: (serviceType: string, serviceName: string, session: ServiceSession) => void;
 }

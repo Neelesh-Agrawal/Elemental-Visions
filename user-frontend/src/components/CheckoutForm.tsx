@@ -68,16 +68,8 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({
             const button = paymentsClient.createButton({
               onClick: () => {
                 paymentsClient.loadPaymentData(paymentRequest)
-                  .then(paymentData => {
-                    // Handle payment success here
-                    console.log('Payment Success:', paymentData);
-                    alert('Payment successful!'); // You can trigger order completion here
-                  })
-                  .catch(err => {
-                    // Handle payment error here
-                    console.error('Payment Error:', err);
-                    alert('Payment failed or cancelled.');
-                  });
+                  .then(() => {})
+                  .catch(() => {});
               },
               buttonColor: 'default',
               buttonType: 'long',
@@ -125,14 +117,11 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({
 				throw new Error('Failed to place order.');
 			}
 
-			const data = await response.json();
-			console.log('Order created:', data);
+			await response.json();
 
 			setShowPayment(true);
 			onOrderComplete(); 
-		} catch (error) {
-			console.error(error);
-			alert('Error placing order. Please try again.');
+		} catch {
 		} finally {
 			setIsSubmitting(false);
 		}
@@ -140,14 +129,14 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({
 
 
 	return (
-		<div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-		<div className="bg-gradient-to-br from-purple-900 to-indigo-900 rounded-2xl p-6 max-w-lg w-full max-h-[90vh] overflow-y-auto border border-purple-500/30">
+		<div className="fixed inset-0 bg-navy/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+		<div className="bg-gradient-to-br from-navy to-plum rounded-2xl p-6 max-w-lg w-full max-h-[90vh] overflow-y-auto border border-plum/30">
 		<div className="flex justify-between items-center mb-6">
-		<h3 className="text-2xl font-bold text-white">Checkout</h3>
-		<button onClick={onClose} className="text-gray-400 hover:text-white text-2xl font-bold">&times;</button>
+		<h3 className="text-2xl font-bold text-sand">Checkout</h3>
+		<button onClick={onClose} className="text-navy/60 hover:text-sand text-2xl font-bold">&times;</button>
 		</div>
 		{showPayment ? (
-			<div className="text-center text-green-400 font-bold text-xl py-12">Order placed! Proceed to payment.</div>
+			<div className="text-center text-teal font-bold text-xl py-12">Order placed! Proceed to payment.</div>
 		) : (
 		<form onSubmit={handleSubmit} className="space-y-6">
 		<div>
@@ -157,7 +146,7 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({
 		placeholder="Your Name"
 		value={formData.customer_name}
 		onChange={handleChange}
-		className="w-full bg-black/30 border border-purple-500/30 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:border-yellow-400 focus:outline-none transition-colors"
+		className="w-full bg-navy/30 border border-plum/30 rounded-lg px-4 py-3 text-sand placeholder-navy/40 focus:border-teal focus:outline-none transition-colors"
 		required
 		/>
 		</div>
@@ -168,7 +157,7 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({
 		placeholder="Your Email"
 		value={formData.email}
 		onChange={handleChange}
-		className="w-full bg-black/30 border border-purple-500/30 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:border-yellow-400 focus:outline-none transition-colors"
+		className="w-full bg-navy/30 border border-plum/30 rounded-lg px-4 py-3 text-sand placeholder-navy/40 focus:border-teal focus:outline-none transition-colors"
 		required
 		/>
 		</div>
@@ -179,7 +168,7 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({
 		placeholder="Your Phone"
 		value={formData.phone}
 		onChange={handleChange}
-		className="w-full bg-black/30 border border-purple-500/30 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:border-yellow-400 focus:outline-none transition-colors"
+		className="w-full bg-navy/30 border border-plum/30 rounded-lg px-4 py-3 text-sand placeholder-navy/40 focus:border-teal focus:outline-none transition-colors"
 		required
 		/>
 		</div>
@@ -190,33 +179,56 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({
 		value={formData.address}
 		onChange={handleChange}
 		rows={3}
-		className="w-full bg-black/30 border border-purple-500/30 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:border-yellow-400 focus:outline-none transition-colors resize-none"
+		className="w-full bg-navy/30 border border-plum/30 rounded-lg px-4 py-3 text-sand placeholder-navy/40 focus:border-teal focus:outline-none transition-colors resize-none"
 		required
 		/>
 		</div>
 		<div className="mb-4">
-		<h3 className="text-xl font-bold text-yellow-400 mb-2">Order Summary</h3>
-		<ul className="divide-y divide-purple-500/20">
+		<h3 className="text-xl font-bold text-teal mb-2">Order Summary</h3>
+		<ul className="divide-y divide-plum/20">
 		{items.map((item, idx) => (
 			<li key={item.crystal.id + '-' + item.form.name + '-' + idx} className="py-2 flex items-center justify-between">
 			<div>
-			<span className="font-semibold text-white">{item.crystal.name}</span>
-			<span className="text-xs text-yellow-400 ml-2">({item.form.name})</span>
-			<span className="text-xs text-purple-300 ml-2">x {item.quantity}</span>
+			<span className="font-semibold text-sand">{item.crystal.name}</span>
+			<span className="text-xs text-teal ml-2">({item.form.name})</span>
+			<span className="text-xs text-sand/70 ml-2">x {item.quantity}</span>
 			</div>
-			<div className="text-yellow-300 font-bold">₹{item.form.price * item.quantity}</div>
+			<div className="text-teal font-bold">
+				₹{item.form.price * item.quantity}{item.form.name === 'Raw' ? ' onwards' : ''}
+			</div>
 			</li>
 		))}
 		</ul>
+		<div className="mt-2 space-y-2">
+		{(() => {
+			const subtotal = items.reduce((sum, item) => sum + (item.form.price * item.quantity), 0);
+			const hasCrystals = items.some(item => item.type === 'crystal');
+			const shippingCharge = hasCrystals ? 150 : 0;
+			return (
+				<>
+					<div className="flex justify-between text-sand">
+						<span>Subtotal:</span>
+						<span>₹{subtotal}</span>
+					</div>
+					{hasCrystals && (
+						<div className="flex justify-between text-sand/70 text-sm">
+							<span>Shipping within India:</span>
+							<span>₹{shippingCharge}</span>
+						</div>
+					)}
+				</>
+			);
+		})()}
 		</div>
-		<div className="mt-auto border-t border-purple-500/30 pt-4 flex justify-between items-center">
-		<span className="text-lg font-bold text-white">Total:</span>
-		<span className="text-2xl font-bold text-yellow-400">₹{total}</span>
+		</div>
+		<div className="mt-auto border-t border-plum/30 pt-4 flex justify-between items-center">
+		<span className="text-lg font-bold text-sand">Total:</span>
+		<span className="text-2xl font-bold text-teal">₹{total}</span>
 		</div>
 		<button
 		type="submit"
 		disabled={isSubmitting}
-		className="mt-6 w-full bg-gradient-to-r from-green-600 to-teal-600 hover:from-green-700 hover:to-teal-700 py-3 rounded-lg font-semibold transition-all duration-300"
+		className="mt-6 w-full bg-gradient-to-r from-teal to-navy hover:opacity-90 py-3 rounded-lg font-semibold transition-all duration-300"
 		>
 		{isSubmitting ? 'Placing Order...' : 'Place Order'}
 		</button>
@@ -224,7 +236,7 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({
 		)}
 		<div className="mt-6 flex flex-col items-center">
           <div ref={gpayBtnRef}></div>
-          <span className="text-xs text-gray-400 mt-2">Pay securely with Google Pay</span>
+          <span className="text-xs text-navy/60 mt-2">Pay securely with Google Pay</span>
         </div>
 		</div>
 		</div>

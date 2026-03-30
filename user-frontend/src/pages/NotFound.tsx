@@ -3,12 +3,12 @@ import Navbar from '../components/Navbar';
 import { Footer } from '../components/Footer';
 
 const NotFound: React.FC = () => (
-  <div className="min-h-screen flex flex-col bg-gradient-to-br from-purple-900 via-indigo-900 to-black text-white">
+  <div className="flex min-h-screen flex-col bg-sand text-navy">
     <Navbar cartCount={0} onCartClick={() => {}} />
-    <div className="flex-1 flex flex-col items-center justify-center">
-      <h1 className="text-6xl font-bold text-yellow-400 mb-4">404</h1>
-      <p className="text-xl text-purple-200 mb-8">Page Not Found</p>
-      <a href="/" className="bg-yellow-400 text-purple-900 px-6 py-3 rounded-lg font-bold hover:bg-yellow-300 transition">Go Home</a>
+    <div className="flex flex-1 flex-col items-center justify-center">
+      <h1 className="mb-4 text-6xl font-bold text-plum">404</h1>
+      <p className="mb-8 text-xl text-navy/75">Page Not Found</p>
+      <a href="/" className="bg-teal text-navy px-6 py-3 rounded-lg font-bold hover:bg-sand transition">Go Home</a>
     </div>
     <Footer />
   </div>

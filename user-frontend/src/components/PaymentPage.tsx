@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
 
@@ -20,10 +20,24 @@ declare global {
   }
 }
 
-const PaymentPage: React.FC = () => {
-  const location = useLocation();
+interface PaymentPageProps {
+  items?: any[];
+  total?: number;
+  bookingData?: any;
+  isService?: boolean;
+}
+
+const PaymentPage: React.FC<PaymentPageProps> = ({ 
+  items = [], 
+  total = 0, 
+  bookingData = null, 
+  isService = false 
+}) => {
   const navigate = useNavigate();
-  const { items = [], total = 0 } = (location.state as any) || {};
+  
+  // Use service booking total if it's a service, otherwise use items total
+  const finalTotal = isService && bookingData ? bookingData.total : total;
+  
 
   const [isGooglePayReady, setIsGooglePayReady] = useState(false);
   const [paymentStatus, setPaymentStatus] = useState<'idle' | 'processing' | 'success' | 'error'>('idle');
@@ -47,20 +61,18 @@ const PaymentPage: React.FC = () => {
       script.onload = () => {
         initializeGooglePay();
       };
-      script.onerror = () => {
-        console.error('Failed to load Google Pay script');
-      };
+      script.onerror = () => {};
       document.head.appendChild(script);
     };
 
     loadGooglePayScript();
-  }, [total]);
+  }, [finalTotal]);
 
   const initializeGooglePay = () => {
-    if (!window.google?.payments || total <= 0) return;
+    if (!window.google?.payments || finalTotal <= 0) return;
 
     const paymentsClient = new window.google.payments.api.PaymentsClient({
-      environment: 'TEST' // Change to 'PRODUCTION' for live payments
+      environment: 'PRODUCTION' // Change to 'PRODUCTION' for live payments
     });
 
     // Configuration for UPI payments in India
@@ -71,14 +83,14 @@ const PaymentPage: React.FC = () => {
         {
           type: 'UPI',
           parameters: {
-            payeeVpa: 'elementalvisions@upi',
+            payeeVpa: 'elementalvisions.in@okhdfcbank',
             payeeName: 'Elemental Visions',
           },
         },
       ],
       transactionInfo: {
         totalPriceStatus: 'FINAL',
-        totalPrice: total.toString(),
+        totalPrice: finalTotal.toString(),
         currencyCode: 'INR',
       },
       merchantInfo: {
@@ -93,9 +105,7 @@ const PaymentPage: React.FC = () => {
         setIsGooglePayReady(true);
         createGooglePayButton(paymentsClient, paymentDataRequest);
       }
-    }).catch((err) => {
-      console.error('Google Pay not available:', err);
-    });
+    }).catch(() => {});
   };
 
   const createGooglePayButton = (paymentsClient: any, paymentDataRequest: any) => {
@@ -114,45 +124,33 @@ const PaymentPage: React.FC = () => {
   const handleGooglePayClick = async (paymentsClient: any, paymentDataRequest: any) => {
     setPaymentStatus('processing');
     try {
-      const paymentData = await paymentsClient.loadPaymentData(paymentDataRequest);
+      await paymentsClient.loadPaymentData(paymentDataRequest);
       // Here you would typically send the payment data to your backend
-      console.log('Payment data received:', paymentData);
       await new Promise(resolve => setTimeout(resolve, 2000));
       setPaymentStatus('success');
-      alert('Payment successful! Order confirmed.');
       setTimeout(() => {
         navigate('/');
       }, 2000);
-    } catch (err: any) {
-      console.error('Payment failed:', err);
+    } catch {
       setPaymentStatus('error');
-      if (err.statusCode === 'CANCELED') {
-        alert('Payment was cancelled.');
-      } else {
-        alert('Payment failed. Please try again.');
-      }
     }
   };
 
   // Alternative UPI payment handler for direct UPI apps
   const handleUPIPayment = () => {
-    const upiUrl = `upi://pay?pa=elementalvisions@upi&pn=Elemental Visions&am=${total}&cu=INR&tn=Order Payment`;
+    const upiUrl = `upi://pay?pa=elementalvisions.in@okhdfcbank&pn=Elemental Visions&am=${finalTotal}&cu=INR&tn=Order Payment`;
     // Try to open UPI app
     const link = document.createElement('a');
     link.href = upiUrl;
     link.click();
-    // Fallback: show instructions
-    setTimeout(() => {
-      alert('If UPI app didn\'t open automatically, please use the QR code or UPI ID to make payment.');
-    }, 1000);
   };
 
   const getStatusColor = () => {
     switch (paymentStatus) {
-      case 'processing': return 'from-blue-500 to-blue-600';
-      case 'success': return 'from-green-500 to-green-600';
-      case 'error': return 'from-red-500 to-red-600';
-      default: return 'from-yellow-500 to-orange-500';
+      case 'processing': return 'bg-plum';
+      case 'success': return 'bg-teal';
+      case 'error': return 'bg-plum';
+      default: return 'bg-teal';
     }
   };
 
@@ -166,19 +164,19 @@ const PaymentPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen w-full bg-gradient-to-br from-purple-900 via-indigo-900 to-black flex flex-col">
+    <div className="min-h-screen w-full bg-sand flex flex-col">
       {/* Header */}
       <div className="w-full text-center py-10">
-        <h1 className="text-4xl md:text-5xl font-extrabold bg-gradient-to-r from-yellow-400 to-orange-400 bg-clip-text text-transparent drop-shadow-lg tracking-tight">
+        <h1 className="inline-block px-1 pb-1 pt-[0.14em] text-4xl font-extrabold leading-[1.22] tracking-tight text-plum md:text-5xl md:leading-[1.2]">
           Complete Your Payment
         </h1>
-        <p className="text-purple-200 mt-2 text-lg">
+        <p className="mt-2 text-lg text-navy/75">
           Thank you for your order! Choose your preferred payment method.
         </p>
         {/* Payment Status Indicator */}
-        <div className={`mt-4 inline-flex items-center px-4 py-2 rounded-full bg-gradient-to-r ${getStatusColor()} text-white font-semibold shadow-lg`}>
+        <div className={`mt-4 inline-flex items-center px-4 py-2 rounded-full ${getStatusColor()} text-sand font-semibold shadow-lg`}>
           {paymentStatus === 'processing' && (
-            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-sand mr-2"></div>
           )}
           {getStatusText()}
         </div>
@@ -186,94 +184,151 @@ const PaymentPage: React.FC = () => {
 
       <div className="flex flex-col md:flex-row w-full h-full flex-1 gap-0 md:gap-0 justify-center items-stretch">
         {/* Left: Payment Methods */}
-        <div className="w-full md:w-1/2 flex flex-col items-center justify-center border-b md:border-b-0 md:border-r border-purple-500/40 p-10 bg-white/10 backdrop-blur-lg shadow-2xl relative" data-aos="fade-right">
+        <div className="w-full md:w-1/2 flex flex-col items-center justify-center border-b md:border-b-0 md:border-r border-plum/40 p-10 bg-sand/10 backdrop-blur-lg shadow-2xl relative" data-aos="fade-right">
           {/* Google Pay Button */}
           {isGooglePayReady && (
             <div className="mb-8 w-full max-w-xs">
-              <h3 className="text-xl font-bold text-white mb-4 text-center">Pay with Google Pay</h3>
+              <h3 className="mb-4 text-center text-xl font-bold text-navy">Pay with Google Pay</h3>
               <div ref={gpayBtnRef} className="w-full"></div>
             </div>
           )}
 
           {/* Divider */}
           <div className="flex items-center w-full max-w-xs mb-8">
-            <div className="flex-grow border-t border-purple-400/30"></div>
-            <span className="flex-shrink mx-4 text-purple-200 text-sm">OR</span>
-            <div className="flex-grow border-t border-purple-400/30"></div>
+            <div className="flex-grow border-t border-plum/30"></div>
+            <span className="mx-4 flex-shrink text-sm text-navy/70">OR</span>
+            <div className="flex-grow border-t border-plum/30"></div>
           </div>
 
           {/* QR Code and UPI */}
           <div className="text-center flex flex-col items-center">
             <div className="flex justify-center items-center mb-6">
-              <div className="p-3 bg-gradient-to-br from-yellow-400/30 to-orange-400/10 shadow-xl border-4 border-yellow-400/40 rounded-2xl flex justify-center items-center"
+              <div className="p-3 bg-gradient-to-br from-sand/25 to-teal/10 shadow-xl border-4 border-teal/40 rounded-2xl flex justify-center items-center"
                 style={{ width: 'max-content', minWidth: '240px', minHeight: '240px' }}>
                 <img
-                  src={`https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=upi://pay?pa=elementalvisions@upi&pn=Elemental Visions&am=${total}&cu=INR&tn=Order Payment`}
+                  src={`https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=upi://pay?pa=elementalvisions.in@okhdfcbank&pn=Elemental Visions&am=${finalTotal}&cu=INR&tn=Order Payment`}
                   alt="UPI QR Code"
-                  className="w-56 h-56 rounded-xl shadow-2xl border-4 border-yellow-400/80"
+                  className="w-56 h-56 rounded-xl shadow-2xl border-4 border-teal/80"
                 />
               </div>
             </div>
-            <div className="text-2xl text-white font-extrabold mb-1 tracking-wide">Scan & Pay</div>
+            <div className="mb-1 text-2xl font-extrabold tracking-wide text-navy">Scan & Pay</div>
             <div className="flex items-center justify-center mb-1">
-              <span className="text-yellow-400 font-mono text-lg md:text-xl mr-2 select-all">elementalvisions@upi</span>
+              <span className="text-teal font-mono text-lg md:text-xl mr-2 select-all">elementalvisions.in@okhdfcbank</span>
               <button
                 onClick={() => {
-                  navigator.clipboard.writeText('elementalvisions@upi');
+                  navigator.clipboard.writeText('elementalvisions.in@okhdfcbank');
                 }}
-                className="bg-yellow-400 text-black px-2 py-1 rounded font-bold text-xs hover:bg-yellow-300 transition"
+                className="bg-teal text-navy px-2 py-1 rounded font-bold text-xs hover:bg-sand transition"
                 title="Copy UPI ID"
               >
                 Copy
               </button>
             </div>
-            <div className="text-xs text-purple-200 mb-4">(UPI ID)</div>
+            <div className="mb-4 text-xs text-navy/70">(UPI ID)</div>
             {/* Direct UPI Payment Button */}
             <button
               onClick={handleUPIPayment}
-              className="mb-4 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 px-6 py-3 rounded-xl font-bold text-white shadow-xl transition-all duration-300 tracking-wide"
+              className="mb-4 bg-gradient-to-r from-navy to-plum hover:opacity-90 px-6 py-3 rounded-xl font-bold text-sand shadow-xl transition-all duration-300 tracking-wide"
               disabled={paymentStatus === 'processing'}
             >
               Pay with UPI App
             </button>
-            <div className="text-sm text-yellow-200 bg-black/30 rounded-lg px-4 py-2 mt-2 inline-block shadow-md">
+            <div className="text-sm text-sand bg-navy/30 rounded-lg px-4 py-2 mt-2 inline-block shadow-md">
               After payment, please take a screenshot and share it with us for order confirmation.
             </div>
           </div>
         </div>
 
         {/* Divider for desktop */}
-        <div className="hidden md:block w-0.5 bg-gradient-to-b from-yellow-400/30 to-purple-400/30 my-16 mx-0"></div>
+        <div className="hidden md:block w-0.5 bg-gradient-to-b from-teal/30 to-plum/30 my-16 mx-0"></div>
 
         {/* Right: Order Summary */}
-        <div className="w-full md:w-1/2 flex flex-col p-10 bg-white/10 backdrop-blur-lg shadow-2xl min-h-[400px] justify-center" data-aos="fade-left">
+        <div className="w-full md:w-1/2 flex flex-col p-10 bg-sand/10 backdrop-blur-lg shadow-2xl min-h-[400px] justify-center" data-aos="fade-left">
+          {/* Customer Info for Service Bookings */}
+          {isService && bookingData && (
+            <div className="mb-6">
+              <h3 className="mb-3 text-2xl font-bold tracking-wide text-plum">Booking Details</h3>
+              <div className="rounded-xl border border-sand/15 bg-navy p-4 shadow-lg">
+                <div className="mb-1 text-sm text-sand/95">
+                  <span className="font-semibold">Customer:</span> {bookingData.customer.customer_name}
+                </div>
+                <div className="mb-1 text-sm text-sand/95">
+                  <span className="font-semibold">Email:</span> {bookingData.customer.email}
+                </div>
+                <div className="text-sm text-sand/95">
+                  <span className="font-semibold">Phone:</span> {bookingData.customer.phone}
+                </div>
+              </div>
+            </div>
+          )}
+          
           <div className="mb-6">
-            <h3 className="text-2xl font-bold text-yellow-400 mb-4 tracking-wide drop-shadow">Order Summary</h3>
-            <ul className="divide-y divide-purple-500/20 bg-black/30 rounded-xl shadow-inner p-4">
-              {items.length === 0 ? (
-                <li className="py-2 text-purple-200">No items in order.</li>
+            <h3 className="mb-4 text-2xl font-bold tracking-wide text-plum">
+              {isService ? 'Service Summary' : 'Order Summary'}
+            </h3>
+            <ul className="divide-y divide-sand/20 rounded-xl border border-sand/15 bg-navy p-4 shadow-lg">
+              {isService && bookingData ? (
+                <li className="py-3 flex items-center justify-between">
+                  <div>
+                    <span className="text-lg font-semibold text-sand">{bookingData.service.name}</span>
+                    <span className="ml-2 text-xs text-teal/90">({bookingData.service.session})</span>
+                    <div className="mt-1 text-xs text-sand/75">{bookingData.service.duration}</div>
+                  </div>
+                  <div className="text-lg font-bold text-teal">₹{bookingData.service.price}</div>
+                </li>
+              ) : items.length === 0 ? (
+                <li className="py-2 text-sand/90">No items in order.</li>
               ) : (
                 items.map((item: any, idx: number) => (
                   <li key={item.crystal.id + '-' + item.form.name + '-' + idx} className="py-3 flex items-center justify-between">
                     <div>
-                      <span className="font-semibold text-white text-lg">{item.crystal.name}</span>
-                      <span className="text-xs text-yellow-400 ml-2">({item.form.name})</span>
-                      <span className="text-xs text-purple-300 ml-2">x {item.quantity}</span>
+                      <span className="font-semibold text-sand text-lg">{item.crystal.name}</span>
+                      <span className="text-xs text-teal ml-2">({item.form.name})</span>
+                      <span className="text-xs text-sand/70 ml-2">x {item.quantity}</span>
                     </div>
-                    <div className="text-yellow-300 font-bold text-lg">₹{item.form.price * item.quantity}</div>
+                    <div className="text-teal font-bold text-lg">
+                      ₹{item.form.price * item.quantity}{item.form.name === 'Raw' ? ' onwards' : ''}
+                    </div>
                   </li>
                 ))
               )}
             </ul>
           </div>
+          
+          {/* Shipping and Total Breakdown */}
+          {!isService && items.length > 0 && (
+            <div className="mb-4 space-y-2">
+              {(() => {
+                const subtotal = items.reduce((sum: number, item: any) => sum + (item.form.price * item.quantity), 0);
+                const hasCrystals = items.some((item: any) => item.type === 'crystal');
+                const shippingCharge = hasCrystals ? 150 : 0;
+                return (
+                  <>
+                    <div className="flex justify-between text-navy/80">
+                      <span>Subtotal:</span>
+                      <span>₹{subtotal}</span>
+                    </div>
+                    {hasCrystals && (
+                      <div className="flex justify-between text-sm text-navy/60">
+                        <span>Shipping within India:</span>
+                        <span>₹{shippingCharge}</span>
+                      </div>
+                    )}
+                  </>
+                );
+              })()}
+            </div>
+          )}
+          
           <div className="mt-auto">
-            <div className="bg-gradient-to-r from-yellow-400/20 to-orange-400/20 rounded-xl p-6 flex justify-between items-center shadow-lg border-2 border-yellow-400/30">
-              <span className="text-xl font-bold text-white">Total:</span>
-              <span className="text-3xl font-extrabold text-yellow-400 drop-shadow">₹{total}</span>
+            <div className="bg-gradient-to-r from-sand/15 to-teal/15 rounded-xl p-6 flex justify-between items-center shadow-lg border-2 border-teal/30">
+              <span className="text-xl font-bold text-navy">Total:</span>
+              <span className="text-3xl font-extrabold text-teal drop-shadow">₹{finalTotal}</span>
             </div>
             <button
               onClick={() => navigate('/')}
-              className="mt-8 w-full bg-gradient-to-r from-green-500 to-teal-500 hover:from-green-600 hover:to-teal-600 py-4 rounded-xl font-bold text-lg text-white shadow-xl transition-all duration-300 tracking-wide"
+              className="mt-8 w-full bg-gradient-to-r from-teal to-navy hover:opacity-90 py-4 rounded-xl font-bold text-lg text-sand shadow-xl transition-all duration-300 tracking-wide"
               disabled={paymentStatus === 'processing'}
             >
               Back to Home

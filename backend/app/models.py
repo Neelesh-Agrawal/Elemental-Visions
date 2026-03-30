@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Float, Enum, DateTime, ForeignKey
+from sqlalchemy import Column, Integer, String, Float, Enum, DateTime, ForeignKey, Text
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from .database import Base
@@ -65,3 +65,29 @@ class ServiceSession(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     service = relationship("Service", back_populates="sessions")
+
+# Service Booking Models
+class ServiceBooking(Base):
+    __tablename__ = "service_bookings"
+
+    id = Column(Integer, primary_key=True, index=True)
+    customer_name = Column(String, nullable=False)
+    email = Column(String, nullable=False)
+    phone = Column(String, nullable=False)
+    total_amount = Column(Float, nullable=False)
+    status = Column(Enum(OrderStatus), default=OrderStatus.pending)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    items = relationship("ServiceBookingItem", back_populates="booking", cascade="all, delete-orphan")
+
+class ServiceBookingItem(Base):
+    __tablename__ = "service_booking_items"
+
+    id = Column(Integer, primary_key=True, index=True)
+    booking_id = Column(Integer, ForeignKey("service_bookings.id"), nullable=False)
+    service_name = Column(String, nullable=False)
+    session_name = Column(String, nullable=False)
+    quantity = Column(Integer, nullable=False)
+    unit_price = Column(Float, nullable=False)
+
+    booking = relationship("ServiceBooking", back_populates="items")

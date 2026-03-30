@@ -1,10 +1,13 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState } from 'react';
 import Navbar from '../components/Navbar';
 import { Footer } from '../components/Footer';
 import Cart from '../components/Cart';
 import CheckoutForm from '../components/CheckoutForm';
-import BookingModal from '../components/BookingModal';
-import { ChevronRight, Star, Eye, Sparkles, Heart, Gem } from 'lucide-react';
+
+import ServiceBookingModal from '../components/ServiceBookingModal';
+import ServiceBookingForm, { ServiceBookingData } from '../components/ServiceBookingForm';
+import ServiceCard from '../components/ServiceCard';
+import { Star, Eye, Sparkles, Heart, Gem } from 'lucide-react';
 import { CartItem, ServiceSession } from '../types';
 import { useNavigate } from 'react-router-dom';
 
@@ -44,6 +47,7 @@ const services = [
     icon: <Gem className="w-8 h-8" />,
     title: "Crystal Healing",
     description: "In a Crystal Healing Session, I use intuitively selected crystals to cleanse, balance, and activate your energy centers (chakras).\nThis gentle yet transformative modality helps you:\n\n🔮 Release emotional blocks\n💖 Heal past traumas\n🧘‍♀️ Regain energetic balance\n🌈 Strengthen aura and spiritual connection\n🌿 Feel lighter, clearer, and more aligned",
+    basePrice: "From ₹299",
     duration: "Varies",
     type: 'crystal'
   }
@@ -53,122 +57,101 @@ const Services: React.FC = () => {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
-  const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
+
+  const [isServiceBookingModalOpen, setIsServiceBookingModalOpen] = useState(false);
+  const [isServiceBookingFormOpen, setIsServiceBookingFormOpen] = useState(false);
   const [selectedService, setSelectedService] = useState({ type: '', name: '' });
+  const [selectedServiceForBooking, setSelectedServiceForBooking] = useState<{
+    serviceType: string;
+    serviceName: string;
+    session: ServiceSession;
+  } | null>(null);
   const navigate = useNavigate();
 
-  // Debug: Log cart changes
-  useEffect(() => {
-    console.log('🛒 Cart updated:', cart);
-    console.log('🛒 Cart length:', cart.length);
-  }, [cart]);
-
-  // Debug: Monitor function when modal state changes
-  useEffect(() => {
-    if (isBookingModalOpen) {
-      console.log('🚨 Modal opened - checking handleAddToCart:');
-      console.log('🚨 Function exists:', !!handleAddToCart);
-      console.log('🚨 Function type:', typeof handleAddToCart);
-      console.log('🚨 Function reference:', handleAddToCart);
-      console.log('🚨 Selected service:', selectedService);
-    }
-  }, [isBookingModalOpen, handleAddToCart, selectedService]);
-
   const handleBookService = (type: string, title: string) => {
-    console.log('📋 Opening booking modal for:', { type, title });
-    console.log('📋 handleAddToCart function before setting modal:', typeof handleAddToCart, handleAddToCart);
     setSelectedService({ type, name: title });
-    setIsBookingModalOpen(true);
+    setIsServiceBookingModalOpen(true);
   };
 
-  // Define handleAddToCart function as a regular function first
-  const handleAddToCartInternal = (serviceType: string, serviceName: string, session: ServiceSession) => {
-    console.log('🔍 handleAddToCart called with:', { serviceType, serviceName, session });
+  // Handle service booking (Book Now)
+  const handleServiceBookNow = (serviceType: string, serviceName: string, session: ServiceSession) => {
+    setSelectedServiceForBooking({
+      serviceType,
+      serviceName,
+      session
+    });
     
-    if (!serviceType || !serviceName || !session) {
-      console.error('❌ Missing required parameters:', { serviceType, serviceName, session });
-      alert('Invalid service data. Please try again.');
-      return;
-    }
-    
-    try {
-      // Convert price to number
-      const price = typeof session.price === 'string' ? 
-        parseInt(session.price.replace(/[^\d]/g, '')) : 
-        Number(session.price);
-      
-      if (isNaN(price) || price <= 0) {
-        console.error('❌ Invalid price:', session.price);
-        alert('Invalid price. Please try again.');
-        return;
-      }
-      
-      console.log('💰 Processed price:', price);
+    setIsServiceBookingModalOpen(false);
+    setIsServiceBookingFormOpen(true);
+  };
 
-      const newItem: CartItem = {
-        crystal: {
-          id: `service-${serviceType}-${session.id}`,
-          name: serviceName,
-          image: '/api/placeholder/300/200',
-          purpose: session.name,
-          description: session.description
-        },
-        form: {
-          name: session.duration || 'Standard',
-          price: price
-        },
+  // Handle service booking form submission
+  const handleServiceBookingSubmit = async (bookingData: ServiceBookingData) => {
+    try {
+      // Prepare service booking data for backend
+      const orderData = {
+        service_name: bookingData.serviceName,
+        session_name: bookingData.selectedSession.name,
         quantity: 1,
-        type: 'service'
+        unit_price: bookingData.total_amount
       };
 
-      console.log('🆕 New item created:', newItem);
-
-      setCart(prevCart => {
-        console.log('📦 Previous cart:', prevCart);
-        
-        const existingItemIndex = prevCart.findIndex(
-          item => item.crystal.id === newItem.crystal.id && item.form.name === newItem.form.name
-        );
-
-        console.log('🔍 Existing item index:', existingItemIndex);
-
-        let updatedCart;
-        if (existingItemIndex > -1) {
-          updatedCart = prevCart.map((item, index) =>
-            index === existingItemIndex
-              ? { ...item, quantity: item.quantity + 1 }
-              : item
-          );
-          console.log('➕ Updated existing item in cart:', updatedCart);
-        } else {
-          updatedCart = [...prevCart, newItem];
-          console.log('🆕 Added new item to cart:', updatedCart);
-        }
-        
-        return updatedCart;
+      // Call API endpoint for service bookings
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+      const response = await fetch(`${apiUrl}/service-bookings/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          customer_name: bookingData.customer_name,
+          email: bookingData.email,
+          phone: bookingData.phone,
+          items: [orderData],
+          total_amount: bookingData.total_amount,
+          status: 'pending'
+        }),
       });
 
-      // Close modal and show success
-      setIsBookingModalOpen(false);
-      console.log('✅ Item should be added to cart');
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || 'Failed to place service booking.');
+      }
+
+      const data = await response.json();
+
+      // Close form and redirect to payment
+      setIsServiceBookingFormOpen(false);
       
-      // Show success message
-      setTimeout(() => {
-        alert(`✅ ${serviceName} - ${session.name} added to cart!`);
-      }, 100);
+      // Navigate to payment with service booking data
+      navigate('/payment', { 
+        state: { 
+          bookingData: {
+            customer: {
+              customer_name: bookingData.customer_name,
+              email: bookingData.email,
+              phone: bookingData.phone
+            },
+            service: {
+              name: bookingData.serviceName,
+              session: bookingData.selectedSession.name,
+              duration: bookingData.selectedSession.duration,
+              price: bookingData.total_amount
+            },
+            total: bookingData.total_amount,
+            booking_id: data.id || 'temp-' + Date.now()
+          },
+          isService: true
+        } 
+      });
       
-    } catch (error) {
-      console.error('❌ Error adding to cart:', error);
-      alert('Error adding item to cart. Please try again.');
+    } catch {
     }
   };
 
-  // Now memoize it with useCallback
-  const handleAddToCart = useCallback(handleAddToCartInternal, [setCart, setIsBookingModalOpen]);
+
 
   const updateCartQuantity = (compositeId: string, quantity: number) => {
-    console.log('🔢 Updating cart quantity:', { compositeId, quantity });
-    
     if (quantity === 0) {
       removeFromCart(compositeId);
       return;
@@ -181,70 +164,55 @@ const Services: React.FC = () => {
           ? { ...item, quantity }
           : item;
       });
-      console.log('📊 Cart after quantity update:', updated);
       return updated;
     });
   };
 
   const removeFromCart = (compositeId: string) => {
-    console.log('🗑️ Removing from cart:', compositeId);
-    
     setCart(prevCart => {
       const filtered = prevCart.filter(item => {
         const itemCompositeId = `${item.crystal.id}-${item.form.name}`;
         return itemCompositeId !== compositeId;
       });
-      console.log('🗑️ Cart after removal:', filtered);
       return filtered;
     });
   };
 
   const getTotalPrice = () => {
-    const total = cart.reduce((sum, item) => sum + (item.form.price * item.quantity), 0);
-    console.log('💰 Total price calculated:', total);
+    const subtotal = cart.reduce((sum, item) => sum + (item.form.price * item.quantity), 0);
+    const hasCrystals = cart.some(item => item.type === 'crystal');
+    const shippingCharge = hasCrystals ? 150 : 0;
+    const total = subtotal + shippingCharge;
     return total;
   };
 
   const handleCartClick = () => {
-    console.log('🛒 Cart clicked, current cart:', cart);
     setIsCartOpen(true);
   };
 
   const handleProceedToCheckout = () => {
-    console.log('✅ Proceeding to checkout with cart:', cart);
     setIsCartOpen(false);
     setIsCheckoutOpen(true);
   };
 
   const handleOrderComplete = () => {
-    console.log('🎉 Order completed with cart:', cart);
     setIsCheckoutOpen(false);
     navigate('/payment', { state: { items: cart, total: getTotalPrice() } });
   };
 
-  const handleCloseBookingModal = () => {
-    console.log('📋 Closing booking modal');
-    setIsBookingModalOpen(false);
-  };
 
-  // Debug: Log the function reference when component renders
-  console.log('🔧 Services component render - handleAddToCart function:', handleAddToCart);
-  console.log('🔧 Services component render - typeof handleAddToCart:', typeof handleAddToCart);
-  console.log('🔧 Services component render - function exists:', !!handleAddToCart);
+
+
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-indigo-900 to-black text-white overflow-x-hidden">
+    <div className="min-h-screen bg-sand text-navy overflow-x-hidden">
       <Navbar cartCount={cart.length} onCartClick={handleCartClick} />
       
-      {/* Debug info - remove in production */}
-      <div className="fixed top-20 right-4 bg-black/80 text-white p-2 rounded text-xs z-40">
-        Cart: {cart.length} items
-      </div>
+
       
       <Cart
         isOpen={isCartOpen}
         onClose={() => {
-          console.log('🛒 Closing cart');
           setIsCartOpen(false);
         }}
         items={cart}
@@ -256,7 +224,6 @@ const Services: React.FC = () => {
       <CheckoutForm
         isOpen={isCheckoutOpen}
         onClose={() => {
-          console.log('📋 Closing checkout');
           setIsCheckoutOpen(false);
         }}
         items={cart}
@@ -264,86 +231,74 @@ const Services: React.FC = () => {
         onOrderComplete={handleOrderComplete}
       />
 
-      {/* BookingModal with explicit validation before rendering */}
-      {isBookingModalOpen && handleAddToCart && (
-        <BookingModal
-          key={`${selectedService.type}-${selectedService.name}-${isBookingModalOpen}`}
-          isOpen={isBookingModalOpen}
-          onClose={handleCloseBookingModal}
+      {/* Service Booking Modal - New booking flow */}
+      {isServiceBookingModalOpen && (
+        <ServiceBookingModal
+          key={`${selectedService.type}-${selectedService.name}-${isServiceBookingModalOpen}`}
+          isOpen={isServiceBookingModalOpen}
+          onClose={() => setIsServiceBookingModalOpen(false)}
           serviceType={selectedService.type}
           serviceName={selectedService.name}
-          onAddToCart={handleAddToCart}
+          onBookNow={handleServiceBookNow}
         />
       )}
 
-      {/* Show error if function is missing */}
-      {isBookingModalOpen && !handleAddToCart && (
-        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
-          <div className="bg-red-900/90 rounded-2xl p-6 max-w-lg w-full border border-red-500/50">
-            <h3 className="text-2xl font-bold text-white mb-4">⚠️ Function Error</h3>
-            <p className="text-red-200 mb-4">
-              The add to cart function is not available. This is a development issue.
-            </p>
-            <button
-              onClick={() => setIsBookingModalOpen(false)}
-              className="w-full bg-red-600 hover:bg-red-700 py-2 px-4 rounded font-bold"
-            >
-              Close
-            </button>
-          </div>
-        </div>
+      {/* Service Booking Form */}
+      {isServiceBookingFormOpen && selectedServiceForBooking && (
+        <ServiceBookingForm
+          isOpen={isServiceBookingFormOpen}
+          onClose={() => setIsServiceBookingFormOpen(false)}
+          serviceType={selectedServiceForBooking.serviceType}
+          serviceName={selectedServiceForBooking.serviceName}
+          selectedSession={selectedServiceForBooking.session}
+          onProceedToCheckout={handleServiceBookingSubmit}
+        />
       )}
 
-      {/* Debug info for troubleshooting */}
-      <div className="fixed top-32 right-4 bg-red-900/80 text-white p-2 rounded text-xs z-40 max-w-xs">
-        <div>Modal Open: {isBookingModalOpen.toString()}</div>
-        <div>Service Type: {selectedService.type}</div>
-        <div>Service Name: {selectedService.name}</div>
-        <div>Handler Type: {typeof handleAddToCart}</div>
-        <div>Handler Exists: {handleAddToCart ? 'YES' : 'NO'}</div>
-        <div>Function Name: {handleAddToCart?.name || 'Anonymous'}</div>
-        <div>Function Valid: {typeof handleAddToCart === 'function' ? 'YES' : 'NO'}</div>
-      </div>
 
-      <section id="services" className="py-20 px-4" data-aos="fade-up">
+
+      <section id="services" className="py-24 px-4 sm:px-6" data-aos="fade-up">
         <div className="max-w-7xl mx-auto">
+
+          {/* Header */}
           <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-teal-400 to-purple-400 bg-clip-text text-transparent font-unbounded drop-shadow-lg">
+            <p
+              className="mb-3 uppercase tracking-[0.28em] text-teal"
+              style={{ fontFamily: "'Gotham', system-ui, sans-serif", fontSize: '10px', fontWeight: 500 }}
+            >
+              What we offer
+            </p>
+            <h2 className="font-heading px-1 pb-0.5 pt-[0.12em] text-4xl leading-[1.25] text-plum md:text-5xl md:leading-[1.2]">
               Sacred Services
             </h2>
-            <p className="text-xl text-gray-300 max-w-3xl mx-auto">
+            <div className="mx-auto mt-5 flex items-center justify-center gap-3" style={{ opacity: 0.35 }}>
+              <div className="h-px w-16 bg-plum" />
+              <div className="h-1.5 w-1.5 rotate-45 bg-plum flex-shrink-0" />
+              <div className="h-px w-16 bg-plum" />
+            </div>
+            <p
+              className="mx-auto mt-5 max-w-2xl text-navy/65"
+              style={{ fontFamily: "'Gotham', system-ui, sans-serif", fontSize: '15px', fontWeight: 300, lineHeight: 1.75 }}
+            >
               Each service is crafted to guide you toward clarity, healing, and transformation
             </p>
           </div>
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+
+          {/* Cards grid — 4 equal columns on lg, 2 on md, horizontal scroll on mobile */}
+          <div
+            className="grid grid-cols-2 lg:grid-cols-4 gap-5 sm:gap-6"
+            style={{ overflowX: 'auto' }}
+          >
             {services.map((service, index) => (
-              <div 
+              <ServiceCard
                 key={index}
-                className="bg-gradient-to-br from-purple-800/50 to-indigo-800/50 glass card-shadow p-8 border border-purple-500/30 hover:border-yellow-400/50 transition-all duration-300 transform hover:scale-105 hover:shadow-2xl group flex flex-col justify-between"
-                data-aos="zoom-in"
-              >
-                <div className="text-yellow-400 mb-4 group-hover:scale-110 transition-transform duration-300">
-                  {service.icon}
-                </div>
-                <h3 className="text-2xl font-bold mb-4 text-white">{service.title}</h3>
-                <p className="text-gray-300 mb-6 leading-relaxed whitespace-pre-line">{service.description}</p>
-                <div className="mt-auto">
-                  <div className="flex justify-between items-center mb-3">
-                    <span className="text-yellow-400 font-semibold text-lg">{service.basePrice}</span>
-                    {service.duration && <span className="text-purple-300 text-sm">{service.duration}</span>}
-                  </div>
-                  <button 
-                    onClick={() => {
-                      console.log('🎯 Service button clicked:', service.type, service.title);
-                      handleBookService(service.type, service.title);
-                    }}
-                    className="w-full bg-gradient-to-r from-teal-600 to-purple-600 hover:from-teal-700 hover:to-purple-700 py-3 rounded-lg font-semibold transition-all duration-300 flex items-center justify-center"
-                  >
-                    Select Service
-                    <ChevronRight className="w-4 h-4 ml-2" />
-                  </button>
-                </div>
-              </div>
+                icon={service.icon}
+                title={service.title}
+                description={service.description}
+                basePrice={service.basePrice}
+                duration={service.duration}
+                onBook={() => handleBookService(service.type, service.title)}
+              />
             ))}
           </div>
         </div>
