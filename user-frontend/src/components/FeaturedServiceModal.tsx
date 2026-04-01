@@ -175,7 +175,7 @@ const ARCANA_TYPES: ArcanaType[] = [
     tagline: 'Small follow up clarity',
     energyExchange: { original: '1199', discounted: '499' },
     intro: [
-      'For small follow up clarity or any missed question post session within 24 hrs via text message.',
+      'For any missed question post session within 48 hrs via text message.',
       'Only for genuine concerns.',
     ],
     whatYouReceive: ['Text follow-up within 24 hours for genuine concerns.'],
@@ -258,6 +258,36 @@ const ALIGNMENT_SUBTYPES: AlignmentSubtype[] = [
     energyExchange: { original: '4999', discounted: '1699' },
   },
 ];
+
+const CRYSTAL_CURATION_CONTENT = {
+  title: 'CRYSTAL CURATION',
+  intro: [
+    'Crystal Curation is a personalized service where crystals are intuitively selected and energetically aligned to support your specific intentions, challenges, and desires.',
+    'This is not random selection, this is conscious curation for your energy field.',
+  ],
+  offers: [
+    'Personalized crystal selection based on your energy',
+    'Alignment with your intentions (love, money, protection, healing, etc.)',
+    'Intuitively chosen combinations for maximum impact',
+    'Guidance on how to use, wear, or place your crystals',
+    'Energy-focused recommendations, not generic suggestions',
+  ],
+  howItWorks: [
+    'You share your intention or concern',
+    'Crystals are carefully selected for your alignment',
+    'You receive usage guidance and activation tips',
+  ],
+  close:
+    'A crystal works best when it resonates with your frequency. When chosen with intention, it becomes more than a stone - it becomes a tool for transformation, protection, and attraction.',
+  disclaimer: [
+    'Crystals are tools for spiritual support and energy alignment',
+    'They do not replace medical, financial, or professional advice',
+    'Results may vary based on individual belief, use, and energy',
+  ],
+  quote:
+    '"When your energy aligns, even the smallest crystal becomes powerful."',
+  energyExchange: '799',
+};
 
 const FeaturedServiceModal: React.FC<FeaturedServiceModalProps> = ({
   isOpen,
@@ -343,8 +373,16 @@ const FeaturedServiceModal: React.FC<FeaturedServiceModalProps> = ({
             >
               Service
             </p>
-            <h2 id="featured-service-title" className="font-heading text-xl text-sand sm:text-2xl">
-              {service.title}
+            <h2
+              id="featured-service-title"
+              className="text-xl text-sand sm:text-2xl"
+              style={{ fontFamily: "'Gotham', system-ui, sans-serif", fontWeight: 500, letterSpacing: '0.08em' }}
+            >
+              {Array.from(service.title).map((ch, idx) => (
+                <span key={`modal-title-${idx}`} style={{ display: 'inline-block' }}>
+                  {ch === ' ' ? '\u00A0' : ch}
+                </span>
+              ))}
             </h2>
           </div>
           <button
@@ -398,7 +436,10 @@ const FeaturedServiceModal: React.FC<FeaturedServiceModalProps> = ({
                         >
                           {t.sessionWindow ? `Sacred Session Window: ${t.sessionWindow}` : 'Quick session'}
                         </div>
-                        <div className="mt-2 font-heading text-sand sm:text-lg" style={{ fontSize: '16px' }}>
+                        <div
+                          className="mt-2 text-sand sm:text-lg"
+                          style={{ fontFamily: "'Gotham', system-ui, sans-serif", fontSize: '16px', fontWeight: 500, letterSpacing: '0.06em' }}
+                        >
                           {t.title}
                         </div>
                         {t.tagline ? (
@@ -462,7 +503,12 @@ const FeaturedServiceModal: React.FC<FeaturedServiceModalProps> = ({
                 >
                   {selectedArcana.sessionWindow ? `Sacred Session Window: ${selectedArcana.sessionWindow}` : 'Quick session'}
                 </p>
-                <h3 className="font-heading text-2xl text-sand">{selectedArcana.title}</h3>
+                <h3
+                  className="text-2xl text-sand"
+                  style={{ fontFamily: "'Gotham', system-ui, sans-serif", fontWeight: 500, letterSpacing: '0.06em' }}
+                >
+                  {selectedArcana.title}
+                </h3>
                 {selectedArcana.tagline ? (
                   <p
                     style={{
@@ -1043,7 +1089,10 @@ const FeaturedServiceModal: React.FC<FeaturedServiceModalProps> = ({
                                   >
                                     {s.sacredWindow}
                                   </div>
-                                  <div className="mt-2 font-heading text-sand" style={{ fontSize: '16px' }}>
+                                  <div
+                                    className="mt-2 text-sand"
+                                    style={{ fontFamily: "'Gotham', system-ui, sans-serif", fontSize: '16px', fontWeight: 500, letterSpacing: '0.06em' }}
+                                  >
                                     {s.title}
                                   </div>
                                   <div
@@ -1088,7 +1137,10 @@ const FeaturedServiceModal: React.FC<FeaturedServiceModalProps> = ({
                         >
                           {selectedAlignment.sacredWindow}
                         </p>
-                        <h3 className="font-heading text-sand" style={{ fontSize: '22px', marginTop: 8 }}>
+                        <h3
+                          className="text-sand"
+                          style={{ fontFamily: "'Gotham', system-ui, sans-serif", fontSize: '22px', marginTop: 8, fontWeight: 500, letterSpacing: '0.06em' }}
+                        >
                           {selectedAlignment.title}
                         </h3>
 
@@ -1159,7 +1211,147 @@ const FeaturedServiceModal: React.FC<FeaturedServiceModalProps> = ({
               </>
             ) : null}
 
-            {serviceId !== 'karmic' && serviceId !== 'alignment' ? (
+            {serviceId === 'crystals' ? (
+              <>
+                <div className="space-y-6 px-6 py-6">
+                  <div className="space-y-3">
+                    {CRYSTAL_CURATION_CONTENT.intro.map((p) => (
+                      <p
+                        key={p}
+                        style={{
+                          fontFamily: "'Gotham', system-ui, sans-serif",
+                          fontSize: '14px',
+                          fontWeight: 300,
+                          color: 'rgba(218,198,171,0.85)',
+                          lineHeight: 1.75,
+                        }}
+                      >
+                        {p}
+                      </p>
+                    ))}
+                  </div>
+
+                  <div className="rounded-lg border border-sand/15 bg-navy/30 px-4 py-4" style={{ backdropFilter: 'blur(8px)' }}>
+                    <p className="mb-2 font-medium uppercase tracking-wider text-sand/50" style={{ fontSize: '10px' }}>
+                      What this experience offers
+                    </p>
+                    <ul
+                      className="list-none space-y-2"
+                      style={{
+                        fontFamily: "'Gotham', system-ui, sans-serif",
+                        fontSize: '13px',
+                        color: 'rgba(218,198,171,0.78)',
+                      }}
+                    >
+                      {CRYSTAL_CURATION_CONTENT.offers.map((x) => (
+                        <li key={x}>• {x}</li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  <div className="rounded-lg border border-sand/15 bg-navy/30 px-4 py-4" style={{ backdropFilter: 'blur(8px)' }}>
+                    <p className="mb-2 font-medium uppercase tracking-wider text-sand/50" style={{ fontSize: '10px' }}>
+                      How it works
+                    </p>
+                    <ul
+                      className="list-none space-y-2"
+                      style={{
+                        fontFamily: "'Gotham', system-ui, sans-serif",
+                        fontSize: '13px',
+                        color: 'rgba(218,198,171,0.78)',
+                      }}
+                    >
+                      {CRYSTAL_CURATION_CONTENT.howItWorks.map((x) => (
+                        <li key={x}>• {x}</li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  <p
+                    style={{
+                      fontFamily: "'Gotham', system-ui, sans-serif",
+                      fontSize: '14px',
+                      fontWeight: 300,
+                      color: 'rgba(218,198,171,0.82)',
+                      lineHeight: 1.75,
+                    }}
+                  >
+                    {CRYSTAL_CURATION_CONTENT.close}
+                  </p>
+
+                  <div className="rounded-lg border border-sand/15 bg-navy/30 px-4 py-4" style={{ backdropFilter: 'blur(8px)' }}>
+                    <p className="mb-2 font-medium uppercase tracking-wider text-sand/50" style={{ fontSize: '10px' }}>
+                      Sacred disclaimer
+                    </p>
+                    <ul
+                      className="list-none space-y-2"
+                      style={{
+                        fontFamily: "'Gotham', system-ui, sans-serif",
+                        fontSize: '13px',
+                        color: 'rgba(218,198,171,0.78)',
+                      }}
+                    >
+                      {CRYSTAL_CURATION_CONTENT.disclaimer.map((x) => (
+                        <li key={x}>• {x}</li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  <p
+                    style={{
+                      fontFamily: "'Gotham', system-ui, sans-serif",
+                      fontSize: '13px',
+                      fontWeight: 300,
+                      color: 'rgba(218,198,171,0.78)',
+                      lineHeight: 1.75,
+                      fontStyle: 'italic',
+                    }}
+                  >
+                    {CRYSTAL_CURATION_CONTENT.quote}
+                  </p>
+
+                  <div
+                    className="rounded-lg border border-sand/15 bg-navy/30 px-4 py-4"
+                    style={{ backdropFilter: 'blur(8px)' }}
+                  >
+                    <p className="mb-1 font-medium uppercase tracking-wider text-sand/50" style={{ fontSize: '10px' }}>
+                      Energy exchange
+                    </p>
+                    <div
+                      style={{
+                        fontFamily: "'Gotham', system-ui, sans-serif",
+                        fontSize: '24px',
+                        fontWeight: 900,
+                        color: '#256060',
+                      }}
+                    >
+                      INR {CRYSTAL_CURATION_CONTENT.energyExchange}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex flex-col gap-3 border-t border-sand/15 px-6 py-5 sm:flex-row sm:justify-end">
+                  <button
+                    type="button"
+                    onClick={onClose}
+                    className="rounded-lg border border-sand/25 px-5 py-2.5 text-sand/80 transition-colors hover:bg-sand/5"
+                    style={{ fontFamily: "'Gotham', system-ui, sans-serif", fontSize: '12px', letterSpacing: '0.08em' }}
+                  >
+                    Close
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleBook}
+                    className="rounded-lg bg-teal px-5 py-2.5 font-semibold text-sand transition-opacity hover:opacity-90"
+                    style={{ fontFamily: "'Gotham', system-ui, sans-serif", fontSize: '12px', letterSpacing: '0.12em' }}
+                  >
+                    Book this service
+                  </button>
+                </div>
+              </>
+            ) : null}
+
+            {serviceId !== 'karmic' && serviceId !== 'alignment' && serviceId !== 'crystals' ? (
               <>
                 <div className="space-y-6 px-6 py-6">
                   <p

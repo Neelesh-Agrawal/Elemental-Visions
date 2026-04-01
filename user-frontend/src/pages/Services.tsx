@@ -7,49 +7,46 @@ import CheckoutForm from '../components/CheckoutForm';
 import ServiceBookingModal from '../components/ServiceBookingModal';
 import ServiceBookingForm, { ServiceBookingData } from '../components/ServiceBookingForm';
 import ServiceCard from '../components/ServiceCard';
-import { Star, Eye, Sparkles, Heart, Gem } from 'lucide-react';
+import { Star, Sparkles, Heart, Gem } from 'lucide-react';
 import { CartItem, ServiceSession } from '../types';
 import { useNavigate } from 'react-router-dom';
 
 const services = [
   {
     icon: <Star className="w-8 h-8" />,
-    title: "Tarot Readings",
-    description: "Navigate life's crossroads with symbolic guidance. Choose from different question packages with personalized spreads.",
-    basePrice: "From ₹600",
-    duration: "10-30 mins",
-    type: 'tarot'
-  },
-  {
-    icon: <Eye className="w-8 h-8" />,
-    title: "Palm Reading",
-    description: "Your hands reveal your destiny. Explore innate gifts and future pathways through sacred line analysis.",
-    basePrice: "₹999",
-    duration: "20 mins",
-    type: 'palm'
+    title: 'ARCANA INSIGHTS',
+    description:
+      'Arcana refers to the symbolic language of tarot cards. Gain insight into the energies shaping your life and explore possible paths with clarity.',
+    basePrice: 'From ₹499',
+    duration: 'Varies',
+    type: 'arcana'
   },
   {
     icon: <Sparkles className="w-8 h-8" />,
-    title: "Karma Analysis",
-    description: "Curious about the karmic patterns holding you back?\nGet your Pending Karma Analysis done and understand the hidden lessons your soul is still carrying",
-    basePrice: "₹999",
-    type: 'karma'
+    title: 'KARMIC PATTERN INSIGHTS',
+    description:
+      'Recognise unresolved cycles that may be shaping your present journey and gain practical clarity to move forward.',
+    basePrice: '₹1999',
+    duration: '20 mins',
+    type: 'karmic'
   },
   {
     icon: <Heart className="w-8 h-8" />,
-    title: "Life Coaching",
-    description: '"When your mind is clear and your aura is light, your path naturally opens." Book your session today and start your transformation.',
-    basePrice: "From ₹999",
-    duration: "15-30 mins",
-    type: 'coaching'
+    title: 'ALIGNMENT SESSIONS',
+    description:
+      'Align your mindset, intentions, and actions with your goals. This process helps you build clarity and move forward with purpose.',
+    basePrice: 'From ₹1699',
+    duration: '24 mins/session',
+    type: 'alignment'
   },
   {
     icon: <Gem className="w-8 h-8" />,
-    title: "Crystal Healing",
-    description: "In a Crystal Healing Session, I use intuitively selected crystals to cleanse, balance, and activate your energy centers (chakras).\nThis gentle yet transformative modality helps you:\n\n🔮 Release emotional blocks\n💖 Heal past traumas\n🧘‍♀️ Regain energetic balance\n🌈 Strengthen aura and spiritual connection\n🌿 Feel lighter, clearer, and more aligned",
-    basePrice: "From ₹299",
-    duration: "Varies",
-    type: 'crystal'
+    title: 'CRYSTALS CURATION',
+    description:
+      'Personalized crystal selection intuitively aligned to your intentions, challenges, and desired outcomes.',
+    basePrice: '₹799',
+    duration: 'Varies',
+    type: 'crystals'
   }
 ];
 

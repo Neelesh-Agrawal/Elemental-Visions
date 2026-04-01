@@ -84,7 +84,7 @@ const featuredHomeServices: FeaturedServiceMeta[] = [
     title: 'ARCANA INSIGHTS',
     description:
       'Arcana refers to the symbolic language of tarot cards. Gain insight into the energies shaping your life. Tarot offers clarity and helps you explore possible paths.',
-    bookingType: 'tarot',
+    bookingType: 'arcana',
     bookingName: 'Tarot Readings',
     artworkSrc: '/featured/arcana-insights.png',
   },
@@ -93,7 +93,7 @@ const featuredHomeServices: FeaturedServiceMeta[] = [
     title: 'ALIGNMENT SESSIONS',
     description:
       'Align your mindset, intentions, and actions with your goals. This process helps you build clarity and move forward with purpose.',
-    bookingType: 'coaching',
+    bookingType: 'alignment',
     bookingName: 'Life Coaching',
     artworkSrc: '/featured/alignment-sessions.png',
   },
@@ -102,7 +102,7 @@ const featuredHomeServices: FeaturedServiceMeta[] = [
     title: 'KARMIC PATTERN INSIGHTS',
     description:
       "Some patterns don't just come from the present. These insights help you recognise unresolved cycles that may be affecting your current path.",
-    bookingType: 'karma',
+    bookingType: 'karmic',
     bookingName: 'Karma Analysis',
     artworkSrc: '/featured/karmic-insights.png',
   },
@@ -111,7 +111,7 @@ const featuredHomeServices: FeaturedServiceMeta[] = [
     title: 'CRYSTALS CURATION',
     description:
       'A curated selection of crystals chosen for their natural energy and purpose. Find pieces that align with your intentions, enhance focus, and support your inner balance.',
-    bookingType: 'crystal',
+    bookingType: 'crystals',
     bookingName: 'Crystal Healing',
     artworkSrc: '/featured/crystals-curation.png',
   },
@@ -548,51 +548,30 @@ const Home: React.FC = () => {
       <section id="crystals" className="py-16 px-2 sm:px-4" data-aos="fade-up">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-12 sm:mb-16">
-            <h2 className="font-heading mb-6 bg-gradient-to-r from-navy via-plum to-teal bg-clip-text text-3xl font-bold text-transparent sm:text-4xl md:text-5xl">
-              Healing Crystals
+            <h2 className="font-heading mb-6 bg-gradient-to-r from-navy via-plum to-teal bg-clip-text px-1 pb-0.5 pt-[0.12em] text-3xl font-bold leading-[1.25] text-transparent sm:text-4xl sm:leading-[1.22] md:text-5xl md:leading-[1.2]">
+              Crystal Studio 
             </h2>
             <p className="mx-auto mb-4 max-w-3xl text-base text-navy/70 sm:text-xl">
               Ethically sourced crystals charged with intention to amplify your spiritual journey
             </p>
-            <div className="bg-teal/10 border border-teal/40 rounded-lg p-3 max-w-2xl mx-auto">
+            {/*<div className="bg-teal/10 border border-teal/40 rounded-lg p-3 max-w-2xl mx-auto">
               <p className="text-sm text-navy font-medium">
                 ⚠️ Images are for reference only. Actual products may vary due to their natural nature.
               </p>
-            </div>
+            </div>*/}
           </div>
-          <div className="relative">
-            <button
-              onClick={() => scrollCrystals('left')}
-              className="absolute left-2 top-1/2 z-20 -translate-y-1/2 transform rounded-full border-4 border-transparent bg-plum p-3 text-sand shadow-xl transition-all duration-300 hover:bg-plum/90"
-              aria-label="Scroll left"
-            >
-              <ChevronLeft className="h-6 w-6" />
-            </button>
-            <button
-              onClick={() => scrollCrystals('right')}
-              className="absolute right-2 top-1/2 z-20 -translate-y-1/2 transform rounded-full border-4 border-transparent bg-plum p-3 text-sand shadow-xl transition-all duration-300 hover:bg-plum/90"
-              aria-label="Scroll right"
-            >
-              <ChevronRight className="h-6 w-6" />
-            </button>
-            <div
-              id="crystals-container"
-              className="flex space-x-6 overflow-x-auto scrollbar-hide pb-4 px-6 sm:px-12 relative"
-              style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-            >
-              {crystals.map((crystal) => (
-                <CrystalCard
-                  key={crystal.id}
-                  image={crystal.image || ''}
-                  name={crystal.name}
-                  purpose={crystal.purpose}
-                  description={crystal.description}
-                  properties={crystal.properties}
-                  forms={crystal.forms.map(f => f.name)}
-                  onSelect={() => handleBookCrystal(crystal)}
-                  isMixels={crystal.name === 'Mixels'}
-                />
-              ))}
+          <div className="mx-auto w-full max-w-4xl">
+            <div className="rounded-2xl border border-sand/20 bg-plum px-6 py-16 text-center shadow-lg">
+              <p
+                className="text-4xl uppercase text-sand sm:text-5xl"
+                style={{
+                  fontFamily: "'Gotham', system-ui, sans-serif",
+                  fontWeight: 500,
+                  letterSpacing: '0.12em',
+                }}
+              >
+                Coming Soon
+              </p>
             </div>
           </div>
         </div>

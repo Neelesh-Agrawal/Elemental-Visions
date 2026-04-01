@@ -12,7 +12,6 @@ interface CrystalCardProps {
 }
 
 const CrystalCard: React.FC<CrystalCardProps> = ({
-  image,
   name,
   purpose,
   description,
@@ -23,11 +22,14 @@ const CrystalCard: React.FC<CrystalCardProps> = ({
 }) => (
   <div className="group relative flex h-[500px] w-80 flex-shrink-0 flex-col justify-between overflow-hidden rounded-2xl border border-navy/12 bg-white/50 shadow-lg transition-all duration-300 hover:z-10 hover:scale-105 hover:border-teal/45 hover:shadow-xl">
     <div className="h-60 w-full relative overflow-hidden rounded-t-2xl flex-shrink-0">
-      <img
-        src={image}
-        alt={name}
-        className="w-full h-full object-cover object-center rounded-t-2xl transition-all duration-300"
-      />
+      <div className="w-full h-full rounded-t-2xl bg-gradient-to-br from-navy via-plum to-navy flex items-center justify-center">
+        <span
+          className="font-heading text-sand uppercase"
+          style={{ fontSize: '22px', letterSpacing: '0.12em', fontWeight: 700 }}
+        >
+          Coming Soon
+        </span>
+      </div>
       <div className="absolute bottom-0 left-0 w-full bg-black/40 backdrop-blur-md p-4 rounded-b-2xl flex flex-col items-start">
         <h3 className="text-2xl font-bold text-sand drop-shadow mb-1">{name}</h3>
         <p className="text-teal font-semibold text-base mb-1 drop-shadow">{purpose}</p>

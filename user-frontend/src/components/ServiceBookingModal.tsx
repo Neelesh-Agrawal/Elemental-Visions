@@ -10,45 +10,34 @@ interface ServiceBookingModalProps {
   onBookNow: (serviceType: string, serviceName: string, session: ServiceSession) => void;
 }
 
-const serviceData: Record<string, { name: string; description: string; sessions: ServiceSession[] }> = {
-  tarot: {
-    name: "Tarot Reading",
-    description: "Navigate life's crossroads with symbolic guidance.",
-    sessions: [
-      { id: "tarot-3q",   name: "3 Questions Reading",            duration: "10 mins", price: 699,  description: "Perfect for quick insights on specific concerns." },
-      { id: "tarot-5q",   name: "1 Tarot Reading Based on 1 Aspect", duration: "20 mins", price: 901,  description: "Comprehensive reading for love, career, finance, etc." },
-      { id: "tarot-full", name: "Full Session",                   duration: "30 mins", price: 1500, description: "A detailed reading for your life problems." },
-    ],
+const defaultSessionByType: Record<string, ServiceSession> = {
+  arcana: {
+    id: 'arcana-default',
+    name: 'ARCANA INSIGHTS',
+    duration: 'Within 24 hrs',
+    price: 499,
+    description: 'Arcana Insights session',
   },
-  palm: {
-    name: "Palm Reading",
-    description: "Explore your destiny through sacred palm line analysis.",
-    sessions: [
-      { id: "palm-basic", name: "Palm Reading Session", duration: "20 mins", price: 999, description: "Detailed reading of palm lines and mounts." },
-    ],
+  karmic: {
+    id: 'karmic-default',
+    name: 'KARMIC PATTERN INSIGHTS',
+    duration: '20 minutes',
+    price: 1999,
+    description: 'Karmic Pattern Insights session',
   },
-  karma: {
-    name: "Karma Analysis",
-    description: "Understand the hidden lessons your soul is still carrying.",
-    sessions: [
-      { id: "karma-basic", name: "Karma Analysis Session", price: 999, description: "In-depth analysis of karmic patterns and soul lessons." },
-    ],
+  alignment: {
+    id: 'alignment-default',
+    name: 'ALIGNMENT SESSIONS',
+    duration: 'Each session 24 mins',
+    price: 1699,
+    description: 'Alignment session',
   },
-  coaching: {
-    name: "Life Coaching",
-    description: "Personalized coaching to transform your life.",
-    sessions: [
-      { id: "coaching-15", name: "15 Minutes Session", duration: "15 mins", price: 999,  description: "Quick consultation for specific goals." },
-      { id: "coaching-30", name: "30 Minutes Session", duration: "30 mins", price: 1499, description: "Comprehensive coaching with action plan." },
-    ],
-  },
-  crystal: {
-    name: "Crystal Healing",
-    description: "Energy alignment, chakra balancing, and intention setting.",
-    sessions: [
-      { id: "crystal-consultancy", name: "Crystal Consultancy", price: 299, description: "Guidance on which crystal you should wear." },
-      { id: "crystal-basic",       name: "Basic Crystal Healing", duration: "20 mins", price: 800, description: "A gentle session for energy cleansing and balance." },
-    ],
+  crystals: {
+    id: 'crystals-default',
+    name: 'CRYSTALS CURATION',
+    duration: 'Varies',
+    price: 799,
+    description: 'Crystal Curation session',
   },
 };
 
@@ -59,7 +48,6 @@ const ServiceBookingModal: React.FC<ServiceBookingModalProps> = ({
   serviceName,
   onBookNow,
 }) => {
-  const data = serviceData[serviceType] ?? { sessions: [] };
   const normalizedServiceName = (serviceName ?? '').trim().toUpperCase();
 
   const arcanaSessionByTitle: Record<string, { duration?: string; price: number; description: string }> = {
@@ -90,9 +78,9 @@ const ServiceBookingModal: React.FC<ServiceBookingModalProps> = ({
   };
 
   const derivedCustomSession: ServiceSession | undefined = (() => {
-    if (serviceType === 'tarot') {
+    if (serviceType === 'arcana') {
       const match = arcanaSessionByTitle[normalizedServiceName];
-      if (!match) return undefined;
+      if (!match) return defaultSessionByType.arcana;
       return {
         id: 'arcana-custom',
         name: serviceName,
@@ -102,20 +90,14 @@ const ServiceBookingModal: React.FC<ServiceBookingModalProps> = ({
       };
     }
 
-    if (serviceType === 'karma') {
+    if (serviceType === 'karmic') {
       if (normalizedServiceName.includes('KARMIC PATTERN INSIGHTS')) {
-        return {
-          id: 'karmic-custom',
-          name: serviceName,
-          description: 'Karmic Pattern Insights session',
-          duration: '20 minutes',
-          price: 1999,
-        };
+        return defaultSessionByType.karmic;
       }
-      return undefined;
+      return defaultSessionByType.karmic;
     }
 
-    if (serviceType === 'coaching') {
+    if (serviceType === 'alignment') {
       const includes = (substr: string) => normalizedServiceName.includes(substr);
       if (includes('QUANTUM ALIGNMENT EXPERIENCE')) {
         return {
@@ -144,13 +126,17 @@ const ServiceBookingModal: React.FC<ServiceBookingModalProps> = ({
           price: 1699,
         };
       }
-      return undefined;
+      return defaultSessionByType.alignment;
+    }
+
+    if (serviceType === 'crystals') {
+      return defaultSessionByType.crystals;
     }
 
     return undefined;
   })();
 
-  const selectedSession: ServiceSession | undefined = derivedCustomSession ?? data.sessions?.[0];
+  const selectedSession: ServiceSession | undefined = derivedCustomSession;
 
   if (!isOpen) return null;
 
