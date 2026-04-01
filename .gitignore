@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # Dependencies
 node_modules/
 */node_modules/
@@ -60,7 +59,30 @@ venv.bak/
 # Temporary files
 *.tmp
 *.temp
-=======
 admin-frontend/.env
 admin-frontend/node_modules/
->>>>>>> 4fa3d9f04f846c48e9bc284634a30cc2d33ab7dc
+# Python cache
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# SQLite DB
+*.db
+
+# Environment files
+.env
+.env.*
+
+# VS Code
+.vscode/
+
+# Virtual envs
+venv/
+.env/
+
+# macOS
+.DS_Store
+
+# Logs
+*.log
