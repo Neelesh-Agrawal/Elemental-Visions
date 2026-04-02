@@ -103,9 +103,9 @@ const Checkout: React.FC = () => {
             onClose={() => setIsCheckoutOpen(false)}
             items={cart}
             total={getTotalPrice()}
-            onOrderComplete={() => {
+            onOrderComplete={(orderId: number) => {
               setIsCheckoutOpen(false);
-              navigate('/payment', { state: { items: cart, total: getTotalPrice() } });
+              navigate('/payment', { state: { items: cart, total: getTotalPrice(), order_id: orderId } });
             }}
           />
         </>

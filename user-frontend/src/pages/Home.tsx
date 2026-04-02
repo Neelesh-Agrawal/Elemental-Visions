@@ -329,6 +329,9 @@ const Home: React.FC = () => {
       }
 
       const data = await response.json();
+      if (!data?.id) {
+        throw new Error('Service booking ID missing in response.');
+      }
 
       // Close form and redirect to payment
       setIsServiceBookingFormOpen(false);
@@ -349,7 +352,7 @@ const Home: React.FC = () => {
               price: bookingData.total_amount
             },
             total: bookingData.total_amount,
-            booking_id: data.id || 'temp-' + Date.now()
+            booking_id: data.id
           },
           isService: true
         } 
@@ -771,13 +774,13 @@ const Home: React.FC = () => {
         const hasCrystals = cart.some(item => item.type === 'crystal');
         const shippingCharge = hasCrystals ? 150 : 0;
         return subtotal + shippingCharge;
-      })()} onOrderComplete={() => { 
+      })()} onOrderComplete={(orderId: number) => {
         setIsCheckoutOpen(false); 
         const subtotal = cart.reduce((sum, item) => sum + (item.form.price * item.quantity), 0);
         const hasCrystals = cart.some(item => item.type === 'crystal');
         const shippingCharge = hasCrystals ? 150 : 0;
         const totalWithShipping = subtotal + shippingCharge;
-        navigate('/payment', { state: { items: cart, total: totalWithShipping } }); 
+        navigate('/payment', { state: { items: cart, total: totalWithShipping, order_id: orderId } });
       }} />
       <Footer />
     </div>

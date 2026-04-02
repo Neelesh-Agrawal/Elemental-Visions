@@ -119,6 +119,9 @@ const Services: React.FC = () => {
       }
 
       const data = await response.json();
+      if (!data?.id) {
+        throw new Error('Service booking ID missing in response.');
+      }
 
       // Close form and redirect to payment
       setIsServiceBookingFormOpen(false);
@@ -139,7 +142,7 @@ const Services: React.FC = () => {
               price: bookingData.total_amount
             },
             total: bookingData.total_amount,
-            booking_id: data.id || 'temp-' + Date.now()
+            booking_id: data.id
           },
           isService: true
         } 
@@ -195,9 +198,9 @@ const Services: React.FC = () => {
     setIsCheckoutOpen(true);
   };
 
-  const handleOrderComplete = () => {
+  const handleOrderComplete = (orderId: number) => {
     setIsCheckoutOpen(false);
-    navigate('/payment', { state: { items: cart, total: getTotalPrice() } });
+    navigate('/payment', { state: { items: cart, total: getTotalPrice(), order_id: orderId } });
   };
 
 

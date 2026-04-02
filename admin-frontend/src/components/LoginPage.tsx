@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Shield, Mail, Lock, Eye, EyeOff } from 'lucide-react';
 
 interface LoginPageProps {
-  onLogin: (email: string, password: string) => boolean;
+  onLogin: (email: string, password: string) => Promise<boolean>;
 }
 
 const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
@@ -20,9 +20,9 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
     // Simulate API call delay
     await new Promise(resolve => setTimeout(resolve, 1000));
 
-    const success = onLogin(email, password);
+    const success = await onLogin(email, password);
     if (!success) {
-      setError('Invalid credentials. Use admin@example.com / admin123');
+      setError('Invalid email or password. Please try again.');
     }
     setIsLoading(false);
   };
@@ -56,7 +56,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="block w-full pl-10 pr-3 py-3 border border-amber-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition duration-200 bg-white/80 backdrop-blur-sm"
-                  placeholder="admin@example.com"
+                  placeholder="Enter admin email"
                 />
               </div>
             </div>
@@ -77,7 +77,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="block w-full pl-10 pr-10 py-3 border border-amber-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition duration-200 bg-white/80 backdrop-blur-sm"
-                  placeholder="admin123"
+                  placeholder="Enter password"
                 />
                 <button
                   type="button"
@@ -113,7 +113,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
           </form>
 
           <div className="mt-6 text-center text-sm text-amber-700 font-serif">
-            Demo credentials: admin@example.com / admin123
+            Secure admin access only
           </div>
         </div>
       </div>

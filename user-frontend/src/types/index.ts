@@ -82,7 +82,7 @@ export interface CheckoutFormProps {
   onClose: () => void;
   items: CartItem[];
   total: number;
-  onOrderComplete: () => void;
+  onOrderComplete: (orderId: number) => void;
 }
 
 export interface BookingModalProps {

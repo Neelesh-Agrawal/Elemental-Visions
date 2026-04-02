@@ -23,7 +23,7 @@ interface ServiceBooking {
 }
 
 const FEEDBACK_FORM_LINK = 'https://forms.gle/your-feedback-form-link';
-const API_BASE_URL = import.meta.env.VITE_API_URL ;
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
 const ServiceBookingsTable: React.FC = () => {
   const [bookings, setBookings] = useState<ServiceBooking[]>([]);
@@ -42,7 +42,9 @@ const ServiceBookingsTable: React.FC = () => {
   const fetchBookings = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`${API_BASE_URL}/service-bookings/`);
+      const response = await fetch(`${API_BASE_URL}/service-bookings/?limit=1000`, {
+        credentials: 'include',
+      });
       if (!response.ok) {
         throw new Error('Failed to fetch service bookings');
       }
@@ -82,6 +84,7 @@ const ServiceBookingsTable: React.FC = () => {
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: 'include',
       });
 
       if (!response.ok) {
@@ -120,6 +123,7 @@ const ServiceBookingsTable: React.FC = () => {
     try {
       const response = await fetch(`${API_BASE_URL}/service-bookings/${bookingId}`, {
         method: 'DELETE',
+        credentials: 'include',
       });
       
       if (!response.ok) throw new Error('Failed to delete booking');

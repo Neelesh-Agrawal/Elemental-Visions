@@ -1,8 +1,9 @@
 from pydantic import BaseModel, EmailStr
-from typing import Optional, List, Union
+from typing import Optional, List, Union, Literal
 
 from datetime import datetime
 from enum import Enum
+
 
 class OrderStatus(str, Enum):
     pending = "pending"
@@ -12,21 +13,24 @@ class OrderStatus(str, Enum):
     delivered = "delivered"
     rejected = "rejected"
 
+
 class OrderItemBase(BaseModel):
     crystal: str
     form: str
     quantity: int
     unit_price: float
 
+
 class OrderItemCreate(OrderItemBase):
     pass
+
 
 class OrderItem(OrderItemBase):
     id: int
 
     class Config:
         from_attributes = True
-        orm_mode = True
+
 
 class OrderBase(BaseModel):
     customer_name: str
@@ -36,17 +40,25 @@ class OrderBase(BaseModel):
     total_amount: float
     status: OrderStatus = OrderStatus.pending
 
+
 class OrderCreate(OrderBase):
     items: List[OrderItemCreate]
+
 
 class Order(OrderBase):
     id: int
     created_at: Optional[datetime]
     items: List[OrderItem] = []
+    payment_status: Optional[str] = None
+    payment_amount: Optional[float] = None
+    payment_currency: Optional[str] = None
+    razorpay_order_id: Optional[str] = None
+    razorpay_payment_id: Optional[str] = None
+    paid_at: Optional[datetime] = None
 
     class Config:
         from_attributes = True
-        orm_mode = True
+
 
 class ServiceSessionBase(BaseModel):
     id: str
@@ -55,8 +67,10 @@ class ServiceSessionBase(BaseModel):
     price: Union[int, float, str]  # Allowing multiple types as per your interface
     description: str
 
+
 class ServiceSessionCreate(ServiceSessionBase):
     pass
+
 
 class ServiceSession(ServiceSessionBase):
     service_id: Optional[str] = None
@@ -64,7 +78,7 @@ class ServiceSession(ServiceSessionBase):
 
     class Config:
         from_attributes = True
-        orm_mode = True
+
 
 class ServiceBase(BaseModel):
     id: str
@@ -74,8 +88,10 @@ class ServiceBase(BaseModel):
     duration: Optional[str] = None
     type: str
 
+
 class ServiceCreate(ServiceBase):
     sessions: List[ServiceSessionCreate]
+
 
 class Service(ServiceBase):
     created_at: Optional[datetime] = None
@@ -84,6 +100,7 @@ class Service(ServiceBase):
     class Config:
         from_attributes = True
 
+
 # Service Booking Schemas
 class ServiceBookingItemBase(BaseModel):
     service_name: str
@@ -91,14 +108,17 @@ class ServiceBookingItemBase(BaseModel):
     quantity: int
     unit_price: float
 
+
 class ServiceBookingItemCreate(ServiceBookingItemBase):
     pass
+
 
 class ServiceBookingItem(ServiceBookingItemBase):
     id: int
 
     class Config:
         from_attributes = True
+
 
 class ServiceBookingBase(BaseModel):
     customer_name: str
@@ -107,14 +127,62 @@ class ServiceBookingBase(BaseModel):
     total_amount: float
     status: OrderStatus = OrderStatus.pending
 
+
 class ServiceBookingCreate(ServiceBookingBase):
     items: List[ServiceBookingItemCreate]
+
 
 class ServiceBooking(ServiceBookingBase):
     id: int
     created_at: Optional[datetime]
     items: List[ServiceBookingItem] = []
+    payment_status: Optional[str] = None
+    payment_amount: Optional[float] = None
+    payment_currency: Optional[str] = None
+    razorpay_order_id: Optional[str] = None
+    razorpay_payment_id: Optional[str] = None
+    paid_at: Optional[datetime] = None
 
     class Config:
         from_attributes = True
-        orm_mode = True
+
+
+class RazorpayCreateOrderResponse(BaseModel):
+    key_id: str
+    razorpay_order_id: str
+    amount: int
+    currency: str
+    entity_type: Literal["order", "service_booking"]
+    entity_id: int
+
+
+class RazorpayVerifyPaymentRequest(BaseModel):
+    entity_type: Literal["order", "service_booking"]
+    entity_id: int
+    razorpay_order_id: str
+    razorpay_payment_id: str
+    razorpay_signature: str
+
+
+class RazorpayVerifyPaymentResponse(BaseModel):
+    success: bool
+    message: str
+
+
+class AdminLoginRequest(BaseModel):
+    email: EmailStr
+    password: str
+
+
+class AdminUserResponse(BaseModel):
+    id: int
+    email: EmailStr
+
+    class Config:
+        from_attributes = True
+
+
+class AuthResponse(BaseModel):
+    success: bool
+    message: str
+    user: Optional[AdminUserResponse] = None

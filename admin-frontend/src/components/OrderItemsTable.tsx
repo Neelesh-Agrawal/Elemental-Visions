@@ -33,7 +33,7 @@ interface FlattenedOrderItem extends OrderItem {
   shippingStatus: 'processing' | 'shipped' | 'delivered';
 }
 
-const API_BASE_URL = import.meta.env.VITE_API_URL ;
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
 const OrderItemsTable: React.FC = () => {
   const [orderItems, setOrderItems] = useState<FlattenedOrderItem[]>([]);
@@ -49,7 +49,9 @@ const OrderItemsTable: React.FC = () => {
   const fetchOrderItems = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`${API_BASE_URL}/orders/?limit=1000`);
+      const response = await fetch(`${API_BASE_URL}/orders/?limit=1000`, {
+        credentials: 'include',
+      });
       if (!response.ok) {
         throw new Error('Failed to fetch orders');
       }
@@ -152,6 +154,7 @@ const OrderItemsTable: React.FC = () => {
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: 'include',
       });
 
       if (!response.ok) {
@@ -192,6 +195,7 @@ const OrderItemsTable: React.FC = () => {
     try {
       const response = await fetch(`${API_BASE_URL}/orders/${orderId}/items/${itemId}`, {
         method: 'DELETE',
+        credentials: 'include',
       });
       
       if (!response.ok) throw new Error('Failed to delete order item');

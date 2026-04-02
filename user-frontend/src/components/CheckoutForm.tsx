@@ -6,7 +6,7 @@ interface CheckoutFormProps {
   onClose: () => void;
   items: CartItem[];
   total: number;
-  onOrderComplete: () => void;
+  onOrderComplete: (orderId: number) => void;
 }
 
 const CheckoutForm: React.FC<CheckoutFormProps> = ({
@@ -117,10 +117,10 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({
 				throw new Error('Failed to place order.');
 			}
 
-			await response.json();
+      const createdOrder = await response.json();
 
-			setShowPayment(true);
-			onOrderComplete(); 
+      setShowPayment(true);
+      onOrderComplete(createdOrder.id);
 		} catch {
 		} finally {
 			setIsSubmitting(false);

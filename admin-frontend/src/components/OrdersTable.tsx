@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Search, Filter, Eye } from 'lucide-react';
+import { Search, Filter } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 interface Order {
@@ -7,7 +7,7 @@ interface Order {
   user_name: string;
   email: string;
   phone: string;
-  paymentStatus: 'pending' | 'approved' | 'rejected';
+  paymentStatus: 'pending' | 'paid' | 'rejected' | 'processing' | 'shipped' | 'delivered';
   amount: number;
   date: string;
   paidFor: 'Order Items' | 'Service Booking';
@@ -18,13 +18,15 @@ const OrdersTable: React.FC = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const apiUrl = import.meta.env.VITE_API_URL;
+  const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
   useEffect(() => {
   const fetchOrders = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`${apiUrl}/orders/`);
+      const response = await fetch(`${apiUrl}/orders/?limit=1000`, {
+        credentials: 'include',
+      });
       if (!response.ok) throw new Error('Failed to fetch orders');
       const data = await response.json();
 
@@ -34,7 +36,7 @@ const OrdersTable: React.FC = () => {
         user_name: o.customer_name,
         email: o.email,
         phone: o.phone,
-        paymentStatus: o.status as 'pending' | 'approved' | 'rejected',
+        paymentStatus: o.status as Order['paymentStatus'],
         amount: o.total_amount,
         date: new Date(o.created_at).toLocaleDateString(),
         paidFor: 'Order Items', // assuming all are order items for now
@@ -67,8 +69,8 @@ const OrdersTable: React.FC = () => {
     return matchesSearch && matchesStatus;
   }).sort((a, b) => {
     // Sort completed orders to the bottom
-    if (a.paymentStatus === 'approved' && b.paymentStatus !== 'approved') return 1;
-    if (b.paymentStatus === 'approved' && a.paymentStatus !== 'approved') return -1;
+    if (a.paymentStatus === 'paid' && b.paymentStatus !== 'paid') return 1;
+    if (b.paymentStatus === 'paid' && a.paymentStatus !== 'paid') return -1;
     return 0;
   });
 
@@ -79,7 +81,7 @@ const OrdersTable: React.FC = () => {
     try {
       let endpoint = '';
       // Map frontend status to backend endpoints
-      if (newStatus === 'approved') {
+      if (newStatus === 'paid') {
         endpoint = `${apiUrl}/orders/${orderId}/pay`;
       } else if (newStatus === 'rejected') {
         endpoint = `${apiUrl}/orders/${orderId}/reject`;
@@ -91,7 +93,8 @@ const OrdersTable: React.FC = () => {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
-        }
+        },
+        credentials: 'include',
       });
       
       if (!response.ok) throw new Error('Failed to update payment status');
@@ -119,6 +122,7 @@ const OrdersTable: React.FC = () => {
     try {
       const response = await fetch(`${apiUrl}/orders/${orderId}`, {
         method: 'DELETE',
+        credentials: 'include',
       });
       
       if (!response.ok) throw new Error('Failed to delete order');
@@ -134,7 +138,10 @@ const OrdersTable: React.FC = () => {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'approved': return 'bg-green-100 text-green-800';
+      case 'paid': return 'bg-green-100 text-green-800';
+      case 'processing': return 'bg-blue-100 text-blue-800';
+      case 'shipped': return 'bg-indigo-100 text-indigo-800';
+      case 'delivered': return 'bg-emerald-100 text-emerald-800';
       case 'rejected': return 'bg-red-100 text-red-800';
       default: return 'bg-yellow-100 text-yellow-800';
     }
@@ -164,7 +171,7 @@ const OrdersTable: React.FC = () => {
             >
               <option value="all">All Status</option>
               <option value="pending">Pending</option>
-              <option value="approved">Approved</option>
+              <option value="paid">Paid</option>
               <option value="rejected">Rejected</option>
             </select>
           </div>
@@ -229,7 +236,7 @@ const OrdersTable: React.FC = () => {
                     className="border border-amber-300 rounded-lg px-2 py-1 text-sm font-serif bg-white/80"
                   >
                     <option value="pending">Pending</option>
-                    <option value="approved">Approved</option>
+                    <option value="paid">Paid</option>
                     <option value="rejected">Rejected</option>
                   </select>
                 </td>

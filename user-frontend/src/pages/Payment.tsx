@@ -9,18 +9,19 @@ const Payment: React.FC = () => {
   const state = location.state as any || {};
   
   // Handle both crystal products (items) and service bookings (bookingData)
-  const { items = [], total = 0, bookingData = null, isService = false } = state;
+  const { items = [], total = 0, bookingData = null, isService = false, order_id = null } = state;
 
   return (
     <div className="min-h-screen w-full bg-gradient-to-br from-plum via-navy to-navy flex flex-col">
       {/* No Navbar on payment page */}
       {/* Use PaymentPage component for payment UI */}
-      <PaymentPage 
-        items={items} 
-        total={total} 
-        bookingData={bookingData} 
-        isService={isService} 
-      />
+        <PaymentPage 
+          items={items} 
+          total={total} 
+          bookingData={bookingData} 
+          orderId={order_id}
+          isService={isService} 
+        />
       <Footer />
     </div>
   );
