@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import type { CartItem } from '../types';
 
 declare global {
   interface Window {
@@ -10,11 +11,22 @@ declare global {
 }
 
 interface PaymentPageProps {
-  items?: any[];
+  items?: CartItem[];
   total?: number;
-  bookingData?: any;
+  bookingData?: {
+    booking_id?: number;
+    total?: number;
+    customer?: { customer_name?: string; email?: string; phone?: string };
+    service?: { name?: string; session?: string; duration?: string; price?: number };
+  } | null;
   isService?: boolean;
   orderId?: number | null;
+}
+
+interface RazorpayHandlerResponse {
+  razorpay_order_id: string;
+  razorpay_payment_id: string;
+  razorpay_signature: string;
 }
 
 const PaymentPage: React.FC<PaymentPageProps> = ({
@@ -104,7 +116,7 @@ const PaymentPage: React.FC<PaymentPageProps> = ({
           entity_type: entityType,
           entity_id: String(entityId),
         },
-        handler: async (response: any) => {
+        handler: async (response: RazorpayHandlerResponse) => {
           try {
             const verifyResponse = await fetch(`${apiUrl}/payments/verify`, {
               method: 'POST',
@@ -125,9 +137,9 @@ const PaymentPage: React.FC<PaymentPageProps> = ({
 
             setStatus('success');
             setTimeout(() => navigate('/'), 1500);
-          } catch (err: any) {
+          } catch (err: unknown) {
             setStatus('error');
-            setErrorMessage(err?.message || 'Payment verification failed.');
+            setErrorMessage(err instanceof Error ? err.message : 'Payment verification failed.');
           }
         },
         modal: {
@@ -141,9 +153,9 @@ const PaymentPage: React.FC<PaymentPageProps> = ({
       });
 
       razorpay.open();
-    } catch (err: any) {
+    } catch (err: unknown) {
       setStatus('error');
-      setErrorMessage(err?.message || 'Unable to start payment. Please try again.');
+      setErrorMessage(err instanceof Error ? err.message : 'Unable to start payment. Please try again.');
     }
   };
 
@@ -170,7 +182,7 @@ const PaymentPage: React.FC<PaymentPageProps> = ({
             </div>
           ) : (
             <ul className="mt-4 space-y-3">
-              {items.map((item: any, idx: number) => (
+              {items.map((item, idx: number) => (
                 <li
                   key={`${item.crystal.id}-${item.form.name}-${idx}`}
                   className="flex items-center justify-between text-navy/90"

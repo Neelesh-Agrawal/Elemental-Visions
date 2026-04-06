@@ -85,7 +85,9 @@ const ServiceBookingForm: React.FC<ServiceBookingFormProps> = ({
         selectedSession,
         total_amount: price,
       });
-    } catch {
+    } catch (err: unknown) {
+      // This form is reused in multiple flows; keep it non-blocking but visible in console.
+      console.error(err);
     } finally {
       setIsSubmitting(false);
     }

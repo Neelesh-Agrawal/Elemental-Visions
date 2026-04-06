@@ -10,8 +10,14 @@ interface BookingModalProps {
   onAddToCart: (serviceType: string, serviceName: string, session: ServiceSession) => void;
 }
 
+interface ServiceData {
+  name: string;
+  description: string;
+  sessions: ServiceSession[];
+}
+
 // Service data based on your JSON files
-const serviceData: Record<string, any> = {
+const serviceData: Record<string, ServiceData> = {
   tarot: {
     name: "Tarot Reading",
     description: "Navigate life's crossroads with symbolic guidance. Choose from different question packages with personalized spreads.",
@@ -115,7 +121,7 @@ const BookingModal: React.FC<BookingModalProps> = ({
   const [selected, setSelected] = useState<string>('');
 
   // Get service data
-  const data = serviceData[serviceType] || { sessions: [] };
+  const data = serviceData[serviceType] || { name: serviceName, description: '', sessions: [] };
 
   useEffect(() => {
     if (data.sessions && data.sessions.length > 0 && !selected) {
@@ -142,7 +148,8 @@ const BookingModal: React.FC<BookingModalProps> = ({
 
     try {
       onAddToCart(serviceType, serviceName, selectedSession);
-    } catch {
+    } catch (err: unknown) {
+      console.error(err);
     }
   };
 

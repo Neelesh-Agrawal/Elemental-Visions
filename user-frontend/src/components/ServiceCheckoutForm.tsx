@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { CartItem } from '../types';
 
 interface ServiceCheckoutFormProps {
@@ -16,14 +17,14 @@ const ServiceCheckoutForm: React.FC<ServiceCheckoutFormProps> = ({
   total,
   onOrderComplete
 }) => {
-  if (!isOpen) return null;
-
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     customer_name: '',
     email: '',
     phone: ''
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -32,13 +33,13 @@ const ServiceCheckoutForm: React.FC<ServiceCheckoutFormProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
+    setErrorMessage('');
 
     try {
-      // Prepare service booking data
+      // Backend expects: service_name, session_name, quantity, unit_price
       const orderItems = items.map(item => ({
         service_name: item.crystal.name,
-        session_name: item.crystal.purpose, // This contains the session name
-        session_duration: item.form.name,
+        session_name: item.crystal.purpose,
         quantity: item.quantity,
         unit_price: item.form.price,
       }));
@@ -56,8 +57,7 @@ const ServiceCheckoutForm: React.FC<ServiceCheckoutFormProps> = ({
           phone: formData.phone,
           items: orderItems,
           total_amount: total,
-          status: 'pending',
-          booking_type: 'service'
+          status: 'pending'
         }),
       });
 
@@ -66,16 +66,43 @@ const ServiceCheckoutForm: React.FC<ServiceCheckoutFormProps> = ({
         throw new Error(errorData.message || 'Failed to place service booking.');
       }
 
-      await response.json();
+      const createdBooking = await response.json();
+      if (!createdBooking?.id) {
+        throw new Error('Service booking ID missing in response.');
+      }
 
       // Show success message and proceed to payment
       onOrderComplete();
+
+      navigate('/payment', {
+        state: {
+          bookingData: {
+            customer: {
+              customer_name: formData.customer_name,
+              email: formData.email,
+              phone: formData.phone
+            },
+            service: {
+              name: orderItems?.[0]?.service_name,
+              session: orderItems?.[0]?.session_name
+            },
+            total,
+            booking_id: createdBooking.id
+          },
+          isService: true
+        }
+      });
       
-    } catch {
+    } catch (err: unknown) {
+      const message =
+        err instanceof Error ? err.message : 'Failed to place service booking.';
+      setErrorMessage(message);
     } finally {
       setIsSubmitting(false);
     }
   };
+
+  if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 bg-navy/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
@@ -84,6 +111,12 @@ const ServiceCheckoutForm: React.FC<ServiceCheckoutFormProps> = ({
           <h3 className="text-2xl font-bold text-sand">Book Your Service</h3>
           <button onClick={onClose} className="text-navy/60 hover:text-sand text-2xl font-bold">&times;</button>
         </div>
+
+        {errorMessage ? (
+          <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+            {errorMessage}
+          </div>
+        ) : null}
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>

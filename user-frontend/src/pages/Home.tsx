@@ -21,7 +21,7 @@ import 'aos/dist/aos.css';
 import { useNavigate } from 'react-router-dom';
 
 // Cart context for global state
-import { CartItem, Crystal, CrystalForm } from '../types';
+import { CartItem, Crystal, CrystalForm, ServiceSession } from '../types';
 
 interface CartContextType {
   cart: CartItem[];
@@ -217,10 +217,10 @@ const Home: React.FC = () => {
   const [selectedServiceForBooking, setSelectedServiceForBooking] = useState<{
     serviceType: string;
     serviceName: string;
-    session: any;
+    session: ServiceSession;
   } | null>(null);
   const [isCrystalModalOpen, setIsCrystalModalOpen] = useState(false);
-  const [selectedCrystal] = useState<any>(null);
+  const [selectedCrystal] = useState<Crystal | null>(null);
   const [crystalScrollPosition, setCrystalScrollPosition] = useState(0);
   const { cart, addToCart, updateCartQuantity, removeFromCart } = useCart();
   const [isCartOpen, setIsCartOpen] = useState(false);
@@ -284,7 +284,7 @@ const Home: React.FC = () => {
   };
 
   // Handle service booking (Book Now)
-  const handleServiceBookNow = (serviceType: string, serviceName: string, session: any) => {
+  const handleServiceBookNow = (serviceType: string, serviceName: string, session: ServiceSession) => {
     setSelectedServiceForBooking({
       serviceType,
       serviceName,
@@ -358,7 +358,8 @@ const Home: React.FC = () => {
         } 
       });
       
-    } catch {
+    } catch (err: unknown) {
+      console.error(err);
     }
   };
   const handleBookCrystal = (crystal: Crystal) => {

@@ -148,7 +148,8 @@ const Services: React.FC = () => {
         } 
       });
       
-    } catch {
+    } catch (err: unknown) {
+      console.error(err);
     }
   };
 

@@ -16,8 +16,6 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({
   total,
   onOrderComplete
 }) => {
-  if (!isOpen) return null;
-
   const [formData, setFormData] = useState({
     customer_name: '',
     email: '',
@@ -26,6 +24,7 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPayment, setShowPayment] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
   const gpayBtnRef = useRef<HTMLDivElement>(null);
 
@@ -88,6 +87,7 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
 		setIsSubmitting(true);
+    setErrorMessage('');
 
 		try {
 			const orderItems = items.map(item => ({
@@ -96,7 +96,7 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({
 				quantity: item.quantity,
 				unit_price: item.form.price,
 			}));
-			const apiUrl = import.meta.env.VITE_API_URL;
+			const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 			const response = await fetch(`${apiUrl}/orders/`, {
 				method: 'POST',
 				headers: {
@@ -121,12 +121,16 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({
 
       setShowPayment(true);
       onOrderComplete(createdOrder.id);
-		} catch {
+		} catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Failed to place order.';
+      setErrorMessage(message);
 		} finally {
 			setIsSubmitting(false);
 		}
 	};
 
+
+  if (!isOpen) return null;
 
 	return (
 		<div className="fixed inset-0 bg-navy/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
@@ -135,6 +139,11 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({
 		<h3 className="text-2xl font-bold text-sand">Checkout</h3>
 		<button onClick={onClose} className="text-navy/60 hover:text-sand text-2xl font-bold">&times;</button>
 		</div>
+    {errorMessage ? (
+      <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+        {errorMessage}
+      </div>
+    ) : null}
 		{showPayment ? (
 			<div className="text-center text-teal font-bold text-xl py-12">Order placed! Proceed to payment.</div>
 		) : (
